@@ -33,7 +33,9 @@
 
 //#define DEVBABY1 // DEVBABY1 board
 //#define ASP     // ASP board
-#define DEVBIG	// Big (first) DEV board
+//#define DEVBIG	// Big (first) DEV board
+#define ESPBOX1	// Big (first) DEV board
+//#define ESPBOX2	// Big (first) DEV board
 
 //ESP8266WiFiMulti wifiMulti; // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
 
@@ -48,6 +50,16 @@ const char* password = "A1b2C3d4";
 
 #ifdef DEVBIG
 const char* ssid = "Gorlitze_etaj";
+const char* password = "A1b2C3d4";
+#endif
+
+#ifdef ESPBOX1
+const char* ssid = "Gorlitze";
+const char* password = "A1b2C3d4";
+#endif
+
+#ifdef ESPBOX2
+const char* ssid = "Gorlitze";
 const char* password = "A1b2C3d4";
 #endif
 
@@ -396,7 +408,7 @@ void setup()
       wifiWaitCounter++;
       Serial.print(wifiWaitCounter);
       Serial.print(", ");
-      if (wifiWaitCounter > 6)
+      if (wifiWaitCounter > 10)
       {
           ESP.restart();
       }
@@ -501,6 +513,24 @@ void setup()
   }
 #endif
 
+#ifdef ESPBOX1
+  if (connectedIP != 1090627776) // which means 192.168.1.65
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ESPBOX2
+  if (connectedIP != 1107404992) // which means 192.168.1.66
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
   // Start of OTA configuration
 #ifdef DEVBABY1
   ArduinoOTA.setHostname("DEVBABY1");
@@ -512,6 +542,14 @@ void setup()
 #endif
 #ifdef DEVBIG
   ArduinoOTA.setHostname("DEVBIG");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef ESPBOX1
+  ArduinoOTA.setHostname("ESPBOX1");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef ESPBOX2
+  ArduinoOTA.setHostname("ESPBOX2");
   ArduinoOTA.setPassword("ototo");
 #endif
 
@@ -687,10 +725,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_1, rel1_status);
+#ifdef ESPBOX1
                 client.println("RELAY_1 is ON");
-                client.println("ASPERSOR SPATE PORNIT");
+                client.println("nimic");
+#endif
                 client.println("");
-                getEepromRel_1();
+                //getEepromRel_1();
         }
 
         if (request.indexOf("rel1off") != -1)
@@ -701,10 +741,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_1, rel1_status);
+#ifdef ESPBOX1
                 client.println("RELAY_1 is OFF");
-                client.println("ASPERSOR SPATE OPRIT");
+                client.println("nimic");
+#endif
                 client.println("");
-                getEepromRel_1();
+                //getEepromRel_1();
         }
 
         if (request.indexOf("rel2on") != -1)
@@ -715,10 +757,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_2, rel2_status);
+#ifdef ESPBOX1
                 client.println("RELAY_2 is ON");
-                client.println("PICURATOR LEGUME PORNIT");
+                client.println("LAMPA SPATE PORNITA");
+#endif
                 client.println("");
-                getEepromRel_2();
+                //getEepromRel_2();
         }
 
         if (request.indexOf("rel2off") != -1)
@@ -729,10 +773,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_2, rel2_status);
+#ifdef ESPBOX1
                 client.println("RELAY_2 is OFF");
-                client.println("PICURATOR LEGUME OPRIT");
+                client.println("LAMPA SPATE OPRITA");
+#endif
                 client.println("");
-                getEepromRel_2();
+                //getEepromRel_2();
         }
 
         if (request.indexOf("rel3on") != -1)
@@ -743,10 +789,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_3, rel3_status);
+#ifdef ESPBOX1
                 client.println("RELAY_3 is ON");
-                client.println("ASPERSOR FATA PORNIT");
+                client.println("LAMPA LATERALA PORNITA");
+#endif
                 client.println("");
-                getEepromRel_3();
+                //getEepromRel_3();
         }
 
         if (request.indexOf("rel3off") != -1)
@@ -757,10 +805,12 @@ void loop()
                 else
                   client.println("Failed to save EEPROM status.");
                 digitalWrite(REL_3, rel3_status);
+#ifdef ESPBOX1
                 client.println("RELAY_3 is OFF");
-                client.println("ASPERSOR FATA OPRIT");
+                client.println("LAMPA LATERALA OPRITA");
+#endif
                 client.println("");
-                getEepromRel_3();
+                //getEepromRel_3();
         }
 
 
@@ -801,20 +851,38 @@ void loop()
 
         if (request.indexOf("ProgVersion") != -1)
         {
-          client.println("*********************");
-          client.println("aspersoare_v0.14_devb");
-          client.println("Comenzi disponibile:");
-          client.println("rel1on - aspersor spate");
-          client.println("rel1off");
-          client.println("rel2on - picurator legume");
-          client.println("rel2off");
-          client.println("rel3on - aspersor fata");
-          client.println("rel3off");
-          client.println("checktime - apeleaza NTP");
-          client.println("boardTime - [sec] timp dupa reset");
-          client.println("localtime - experimental");
-          client.println("SystemRestart - Reset sistem");
-          client.println("****************************");
+        	client.println("*********************");
+        	client.println("Versiune: aspersoare_v0_14_sloeber1");
+#ifdef ESPBOX1
+        	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
+        	client.println("Comenzi disponibile:");
+        	client.println("rel1on (buton SP ON)- nimic");
+        	client.println("rel1off (buton SP OFF) - nimic");
+        	client.println("rel2on (buton LEG ON) - lampa spate ON");
+        	client.println("rel2off (buton LEG OFF) - lampa spate OFF");
+        	client.println("rel3on (buton FA ON) - lampa laterala ON");
+        	client.println("rel3off (buton FA OFF) - lampa laterala OFF");
+        	client.println("checktime - apeleaza NTP");
+        	client.println("boardTime - [sec] timp dupa reset");
+        	client.println("localtime - experimental");
+        	client.println("SystemRestart (buton RESET) - Reset sistem");
+
+#endif
+
+
+          //client.println("Cutie relee ESPBOX1");
+//          client.println("Comenzi disponibile:");
+//          client.println("rel1on - aspersor spate");
+//          client.println("rel1off");
+//          client.println("rel2on - picurator legume");
+//          client.println("rel2off");
+//          client.println("rel3on (buton FA ON) - aspersor fata");
+//          client.println("rel3off");
+//          client.println("checktime - apeleaza NTP");
+//          client.println("boardTime - [sec] timp dupa reset");
+//          client.println("localtime - experimental");
+//          client.println("SystemRestart - Reset sistem");
+        	client.println("****************************");
 
         }
 
@@ -854,7 +922,10 @@ void loop()
         if (request.indexOf("BoardStartupTime") != -1)
         {
            client.println("*** System status ***");
-           client.println("* Device: DEVBIG *");
+#ifdef ESPBOX1
+           client.println("* Device: ESPBOX1 - curte SPATE *");
+#endif
+           //client.println("* Device: ESPBOX2 *");
            client.print("Board START-UP Time: ");
            client.println(formattedStartupTime);
            client.print("Board START-UP Date: ");
@@ -871,14 +942,17 @@ void loop()
 //           client.println(nbOfWifiConnectionLosses);
            client.print("connectedIP: ");
            client.println(IPAddress(connectedIP));
+           client.println(connectedIP);
            client.print("WifiConnectionLosses: ");
            client.println(wifiDisconnectedCounter);
+#ifdef ESPBOX1
            client.print("rel1_status: ");
            client.println(rel1_status);
-           client.print("rel2_status: ");
+           client.print("rel2_status (lampa spate): ");
            client.println(rel2_status);
-           client.print("rel3_status: ");
+           client.print("rel3_status (lampa laterala): ");
            client.println(rel3_status);
+#endif
            client.println("");
         }
 
