@@ -31,11 +31,43 @@
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
 
-//#define DEVBABY1 // DEVBABY1 board
+/************* MENU MAP *****************************************
+ * "meniu_1" - O tura aspersor spate 15 min
+ * "meniu_2" - O tura aspersor spate 20 min
+ * "meniu_3" - O tura aspersor spate 25 min
+ * "meniu_4" - O tura aspersor spate 30 min
+ * "meniu_5" - O tura aspersor fata 15 min
+ * "meniu_6" - O tura aspersor fata 20 min
+ * "meniu_7" - O tura aspersor fata 25 min
+ * "meniu_8" - O tura aspersor fata 30 min
+ * "meniu_9" - O tura picurator gradina 15 min
+ * "meniu_10" - O tura picurator gradina 20 min
+ * "meniu_11" - O tura picurator gradina 25 min
+ * "meniu_12" - O tura picurator gradina 30 min
+ * "meniu_13" - O tura aspersor fata, apoi spate, cate 15 min
+ * "meniu_14" - O tura aspersor fata, apoi spate, cate 20 min
+ * "meniu_15" - O tura aspersor fata, apoi spate, cate 25 min
+ * "meniu_16" - O tura aspersor fata, apoi spate, cate 30 min
+ * "meniu_17" - O tura aspersor fata, apoi spate, apoi picurator cate 15 min
+ * "meniu_18" - O tura aspersor fata, apoi spate, apoi picurator cate 20 min
+ * "meniu_19" - O tura aspersor fata, apoi spate, apoi picurator cate 25 min
+ * "meniu_20" - O tura aspersor fata, apoi spate, apoi picurator cate 30 min
+ * "meniu_21" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 15 min
+ * "meniu_22" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 20 min
+ * "meniu_23" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 25 min
+ * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
+****************************************************************/
+
+bool meniuAutomatInCurs = 0;
+bool meniuProgramatInCurs = 0;
+unsigned int nrMeniuAutomat = 0;
+
+
+#define DEVBABY1 // DEVBABY1 board
 //#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
-#define ESPBOX1	// Big (first) DEV board
-//#define ESPBOX2	// Big (first) DEV board
+//#define ESPBOX1	// controller lumini spate
+//#define ESPBOX2	// controller lumini fata
 
 //ESP8266WiFiMulti wifiMulti; // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
 
@@ -393,6 +425,12 @@ void setup()
    digitalWrite(REL_2, LOW);
    digitalWrite(REL_3, LOW);
 
+#ifdef DEVBABY1
+   digitalWrite(REL_1, HIGH);
+   digitalWrite(REL_2, HIGH);
+   digitalWrite(REL_3, HIGH);
+#endif
+
 
   // Connect to WiFi
   Serial.println();
@@ -418,7 +456,11 @@ void setup()
 
   if (WiFi.status() == WL_CONNECTED)
   {
-
+#ifdef DEVBABY1
+	   digitalWrite(REL_1, LOW);
+	   digitalWrite(REL_2, HIGH);
+	   digitalWrite(REL_3, LOW);
+#endif
         // Initialize a NTPClient to get time
         timeClient.begin();
         delay(100);
@@ -729,6 +771,19 @@ void loop()
                 client.println("RELAY_1 is ON");
                 client.println("nimic");
 #endif
+#ifdef ESPBOX2
+                client.println("RELAY_1 is ON");
+                client.println("Lampa fara senzor pornita");
+#endif
+#ifdef ASP
+                client.println("RELAY_1 is ON");
+                client.println("Aspersoare SPATE pornite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_1 is ON");
+                //client.println("Aspersoare SPATE pornite");
+#endif
+
                 client.println("");
                 //getEepromRel_1();
         }
@@ -744,6 +799,18 @@ void loop()
 #ifdef ESPBOX1
                 client.println("RELAY_1 is OFF");
                 client.println("nimic");
+#endif
+#ifdef ESPBOX2
+                client.println("RELAY_1 is OFF");
+                client.println("Lampa fara senzor oprita");
+#endif
+#ifdef ASP
+                client.println("RELAY_1 is OFF");
+                client.println("Aspersoare SPATE oprite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_1 is OFF");
+                //client.println("Aspersoare SPATE oprite");
 #endif
                 client.println("");
                 //getEepromRel_1();
@@ -761,6 +828,18 @@ void loop()
                 client.println("RELAY_2 is ON");
                 client.println("LAMPA SPATE PORNITA");
 #endif
+#ifdef ESPBOX2
+                client.println("RELAY_2 is ON");
+                client.println("Priza backup pornita");
+#endif
+#ifdef ASP
+                client.println("RELAY_2 is ON");
+                client.println("Picuratoare gradina pornite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_2 is ON");
+                //client.println("Picuratoare gradina pornite");
+#endif
                 client.println("");
                 //getEepromRel_2();
         }
@@ -776,6 +855,18 @@ void loop()
 #ifdef ESPBOX1
                 client.println("RELAY_2 is OFF");
                 client.println("LAMPA SPATE OPRITA");
+#endif
+#ifdef ESPBOX2
+                client.println("RELAY_2 is OFF");
+                client.println("Priza backup oprita");
+#endif
+#ifdef ASP
+                client.println("RELAY_2 is OFF");
+                client.println("Picuratoare gradina oprite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_2 is OFF");
+                //client.println("Picuratoare gradina oprite");
 #endif
                 client.println("");
                 //getEepromRel_2();
@@ -793,6 +884,18 @@ void loop()
                 client.println("RELAY_3 is ON");
                 client.println("LAMPA LATERALA PORNITA");
 #endif
+#ifdef ESPBOX2
+                client.println("RELAY_3 is ON");
+                client.println("Lampa cu senzor pornita");
+#endif
+#ifdef ASP
+                client.println("RELAY_3 is ON");
+                client.println("Aspersoare FATA pornite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_3 is ON");
+                //client.println("Aspersoare FATA pornite");
+#endif
                 client.println("");
                 //getEepromRel_3();
         }
@@ -808,6 +911,18 @@ void loop()
 #ifdef ESPBOX1
                 client.println("RELAY_3 is OFF");
                 client.println("LAMPA LATERALA OPRITA");
+#endif
+#ifdef ESPBOX2
+                client.println("RELAY_3 is OFF");
+                client.println("Lampa cu senzor oprita");
+#endif
+#ifdef ASP
+                client.println("RELAY_3 is OFF");
+                client.println("Aspersoare FATA oprite");
+#endif
+#ifdef DEVBABY1
+                client.println("LED_3 is OFF");
+                //client.println("Aspersoare FATA oprite");
 #endif
                 client.println("");
                 //getEepromRel_3();
@@ -852,7 +967,7 @@ void loop()
         if (request.indexOf("ProgVersion") != -1)
         {
         	client.println("*********************");
-        	client.println("Versiune: aspersoare_v0_14_sloeber1");
+        	client.println("Versiune: aspersoare_v0_14_sloeber_1");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -868,20 +983,53 @@ void loop()
         	client.println("SystemRestart (buton RESET) - Reset sistem");
 
 #endif
+#ifdef ESPBOX2
+        	client.println("Cutie relee ESPBOX2 - CURTE FATA");
+        	client.println("Comenzi disponibile:");
+        	client.println("rel1on (buton SP ON)- lampa fara senzor ON");
+        	client.println("rel1off (buton SP OFF) - lampa fara senzor OFF");
+        	client.println("rel2on (buton LEG ON) - priza backup ON");
+        	client.println("rel2off (buton LEG OFF) - priza backup OFF");
+        	client.println("rel3on (buton FA ON) - lampa cu senzor ON");
+        	client.println("rel3off (buton FA OFF) - lampa cu senzor OFF");
+        	client.println("checktime - apeleaza NTP");
+        	client.println("boardTime - [sec] timp dupa reset");
+        	client.println("localtime - experimental");
+        	client.println("SystemRestart (buton RESET) - Reset sistem");
+
+#endif
+#ifdef ASP
+        	client.println("Cutie relee ASPERSOARE");
+        	client.println("Comenzi disponibile:");
+        	client.println("rel1on (buton SP ON)- porneste asp spate");
+        	client.println("rel1off (buton SP OFF) - opreste asp spate");
+        	client.println("rel2on (buton LEG ON) - porneste picuratoare gradina");
+        	client.println("rel2off (buton LEG OFF) - opreste picuratoare gradina");
+        	client.println("rel3on (buton FA ON) - porneste asp fata");
+        	client.println("rel3off (buton FA OFF) - opreste asp fata");
+        	client.println("checktime - apeleaza NTP");
+        	client.println("boardTime - [sec] timp dupa reset");
+        	client.println("localtime - experimental");
+        	client.println("SystemRestart (buton RESET) - Reset sistem");
+
+#endif
+#ifdef DEVBABY1
+        	client.println("Placa devzoltare 'DEVBABY1'");
+        	client.println("Comenzi disponibile:");
+        	client.println("rel1on (buton SP ON)- porneste LED_1");
+        	client.println("rel1off (buton SP OFF) - opreste LED_1");
+        	client.println("rel2on (buton LEG ON) - porneste LED_2");
+        	client.println("rel2off (buton LEG OFF) - opreste LED_2");
+        	client.println("rel3on (buton FA ON) - porneste LED_3");
+        	client.println("rel3off (buton FA OFF) - opreste LED_3");
+        	client.println("checktime - apeleaza NTP");
+        	client.println("boardTime - [sec] timp dupa reset");
+        	client.println("localtime - experimental");
+        	client.println("SystemRestart (buton RESET) - Reset sistem");
+
+#endif
 
 
-          //client.println("Cutie relee ESPBOX1");
-//          client.println("Comenzi disponibile:");
-//          client.println("rel1on - aspersor spate");
-//          client.println("rel1off");
-//          client.println("rel2on - picurator legume");
-//          client.println("rel2off");
-//          client.println("rel3on (buton FA ON) - aspersor fata");
-//          client.println("rel3off");
-//          client.println("checktime - apeleaza NTP");
-//          client.println("boardTime - [sec] timp dupa reset");
-//          client.println("localtime - experimental");
-//          client.println("SystemRestart - Reset sistem");
         	client.println("****************************");
 
         }
@@ -919,11 +1067,20 @@ void loop()
           ESP.restart();
         }
 
-        if (request.indexOf("BoardStartupTime") != -1)
+        if (request.indexOf("BoardStartupTime") != -1)	// "Status" button
         {
            client.println("*** System status ***");
 #ifdef ESPBOX1
-           client.println("* Device: ESPBOX1 - curte SPATE *");
+           client.println("* Device: ESPBOX1 - lumini curte SPATE *");
+#endif
+#ifdef ESPBOX2
+           client.println("* Device: ESPBOX2 - lumini curte FATA *");
+#endif
+#ifdef ASP
+           client.println("* Device: ASPERSOARE si PICURATOARE *");
+#endif
+#ifdef DEVBABY1
+           client.println("* Device: Placa dezvoltare <DEVBABY1> *");
 #endif
            //client.println("* Device: ESPBOX2 *");
            client.print("Board START-UP Time: ");
@@ -946,11 +1103,35 @@ void loop()
            client.print("WifiConnectionLosses: ");
            client.println(wifiDisconnectedCounter);
 #ifdef ESPBOX1
-           client.print("rel1_status: ");
+           client.print("rel1_status: (backup)");
            client.println(rel1_status);
            client.print("rel2_status (lampa spate): ");
            client.println(rel2_status);
            client.print("rel3_status (lampa laterala): ");
+           client.println(rel3_status);
+#endif
+#ifdef ESPBOX2
+           client.print("rel1_status (lampa fara senzor): ");
+           client.println(rel1_status);
+           client.print("rel2_status (priza backup): ");
+           client.println(rel2_status);
+           client.print("rel3_status (lampa cu senzor): ");
+           client.println(rel3_status);
+#endif
+#ifdef ASP
+           client.print("rel1_status (Asp spate): ");
+           client.println(rel1_status);
+           client.print("rel2_status (Irigatii legume): ");
+           client.println(rel2_status);
+           client.print("rel3_status (Asp fata): ");
+           client.println(rel3_status);
+#endif
+#ifdef DEVBABY1
+           client.print("rel1_status (LED_1): ");
+           client.println(rel1_status);
+           client.print("rel2_status (LED_2): ");
+           client.println(rel2_status);
+           client.print("rel3_status (LED_3): ");
            client.println(rel3_status);
 #endif
            client.println("");
