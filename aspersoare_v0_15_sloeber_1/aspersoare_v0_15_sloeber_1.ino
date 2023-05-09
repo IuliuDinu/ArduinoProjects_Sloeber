@@ -33,6 +33,9 @@
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
 
+#define TRUE 1
+#define FALSE 0
+
 /************* MENU MAP *****************************************
  * "meniu_1" - O tura aspersor spate 15 min
  * "meniu_2" - O tura aspersor spate 20 min
@@ -77,8 +80,13 @@ unsigned int nrMeniuAutomat = 0;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
 
-#if defined (DEVBABY1) || defined (ASP)
+#if defined (DEVBABY1x) || defined (ASP)
 const char* ssid = "Gorlitze";
+const char* password = "A1b2C3d4";
+#endif
+
+#ifdef DEVBABY1 // we use multiple connection options for this devboard
+const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
@@ -121,6 +129,9 @@ byte nbOfWifiConnectionLosses = 0;
 byte rel1_status = LOW;
 byte rel2_status = LOW;
 byte rel3_status = LOW;
+byte timerInProgress = FALSE;
+
+byte loadsInProgress[3] = {{FALSE}};
 
 //Week Days
 String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -143,6 +154,7 @@ unsigned long localTime = 0;
 unsigned long syncTime = 0;
 unsigned long gul_max24hMillis = 0;
 unsigned long wifiConnectedTimeBySystemTime;
+unsigned long programStartTime = 0;
 
 bool gb_timeIsSynced = 0;
 bool gb_timeHasToBeSynced = 1;
@@ -462,6 +474,7 @@ void setup()
 	   digitalWrite(REL_1, LOW);
 	   digitalWrite(REL_2, HIGH);
 	   digitalWrite(REL_3, LOW);
+	   setEepromRel_2(HIGH);
 #endif
         // Initialize a NTPClient to get time
         timeClient.begin();
@@ -530,8 +543,17 @@ void setup()
   Serial.println(connectedIP);
   Serial.println(IPAddress(connectedIP));
 
-#ifdef DEVBABY1
-  if (connectedIP != 1023518912) // which means 192.168.1.61
+#ifdef DEVBABY1x // we use multiple connection options for this devboard
+  if (connectedIP != 1023518912) // which means 192.168.1.61 - for TPLink
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef DEVBABY1 // we use multiple connection options for this devboard
+  if (connectedIP != 1023519168) // which means 192.169.1.61 - for Kaon
   {
     Serial.println("Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
@@ -717,6 +739,17 @@ void loop()
   ArduinoOTA.handle(); // OTA usage
 
   WiFiClient client = server.available();
+
+  if (timerInProgress != FALSE)
+  {
+	  if (((currentMillis/1000)-programStartTime) > 900 )
+		  {
+		  	  rel1_status = LOW;
+		  	  digitalWrite(REL_1, rel1_status);
+		  	  timerInProgress = FALSE;
+		  	  loadsInProgress[0] = FALSE;
+		  }
+  }
 
   if (!client)
   {
@@ -971,7 +1004,7 @@ void loop()
         if (request.indexOf("ProgVersion") != -1)
         {
         	client.println("*********************");
-        	client.println("Versiune: aspersoare_v0_14_sloeber_1");
+        	client.println("Versiune: aspersoare_v0_15_sloeber_1");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -1207,6 +1240,74 @@ void loop()
 
         }
 
+        if (request.indexOf("timeAspects") != -1)
+		{
+        	client.print("boardMillis: ");
+        	client.println(millis());
+		}
+
+        if (request.indexOf("meniu_1") != -1)
+        {
+        	// O tura aspersor spate 15 min
+        	// rel1
+
+        	rel1_status = HIGH;
+			/*if (setEepromRel_1(rel1_status))
+			  client.println("EEPROM status saved OK.");
+			else
+			  client.println("Failed to save EEPROM status.");*/
+			digitalWrite(REL_1, rel1_status);
+
+        	#ifdef ASP
+        	                client.println("RELAY_1 is ON");
+        	                client.println("Aspersoare SPATE pornite pt 15min");
+        	#endif
+        	#ifdef DEVBABY1
+        	                client.println("LED_1 is ON");
+        	                client.println("for 15 minutes");
+        	#endif
+
+        	                client.println("");
+
+			/*if (syncWithNTP())
+			{
+				client.print("Local time (s) at program start: ");
+				client.println(localTime);
+			}
+			else
+			{
+				client.println("Failure, try again.");
+			}*/
+
+			programStartTime = millis()/1000;
+			client.print("Local time (s) at program start: ");
+			client.println(programStartTime);
+			timerInProgress = TRUE;
+			loadsInProgress[0] = TRUE;
+
+
+        }
+
+        if (request.indexOf("timers_status") != -1)
+        {
+        	if (timerInProgress != FALSE)
+			{
+				client.println("Programmed loads:");
+				client.print("LED_1, LED_2, LED_3: ");
+				client.print(loadsInProgress[0]);
+				client.print(loadsInProgress[1]);
+				client.print(loadsInProgress[2]);
+				client.println("");
+
+
+        		unsigned long delta = (millis()/1000) - programStartTime;
+        		client.print("Seconds in progress: ");
+        		client.println(delta);
+        	}
+        	else
+        		client.println("No programmed loads at this time.");
+
+        }
 
 
 
