@@ -32,6 +32,10 @@
 
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
+#define TIME_INTERVAL_TO_RECHECK_NTP	300000 // 300000ms = 5 min
+//#define TIME_INTERVAL_TO_RECHECK_NTP	900000 // 900000ms = 15 min
+//#define TIME_INTERVAL_TO_RECHECK_NTP	60000 // 60000ms = 1 min
+#define AVG_MEASURED_MAIN_LOOP_DURATION_MS	502
 
 #define TRUE 1
 #define FALSE 0
@@ -150,11 +154,16 @@ WiFiServer server(80);
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
-unsigned long localTime = 0;
+unsigned long localTime = 0; // seconds
+unsigned long localTimeMs = 0; // milliseconds
+unsigned long boardTime = 0; // seconds
+unsigned long boardTimeMs = 0; // milliseconds
 unsigned long syncTime = 0;
 unsigned long gul_max24hMillis = 0;
 unsigned long wifiConnectedTimeBySystemTime;
 unsigned long programStartTime = 0;
+unsigned long timestampForNextNTPSync = 0;
+unsigned char cnt = 0;
 
 bool gb_timeIsSynced = 0;
 bool gb_timeHasToBeSynced = 1;
@@ -253,6 +262,7 @@ bool syncWithNTP()
   if (timeClientUpdateSuccess)
     {
       localTime = (timeClient.getHours()*3600)+(timeClient.getMinutes()*60)+timeClient.getSeconds();
+      localTimeMs = localTime * 1000;
       get24HMaxMillis();
       syncTime = gul_max24hMillis/1000;
     }
@@ -418,6 +428,34 @@ byte getEepromRel_3()
     return state;
   else
     return 0;
+}
+
+void updateLocalTimersInMainLoop()
+{
+	  currentMillis = millis();
+
+	  // Updating localtime every 15 minutes
+	  if ((currentMillis - timestampForNextNTPSync) > TIME_INTERVAL_TO_RECHECK_NTP)
+	  {
+		  if (syncWithNTP())
+		  {
+			  Serial.print("Local time (s): ");
+			  Serial.println(localTime);
+		  }
+		  else
+		  {
+			  Serial.println("Failure, try again.");
+		  }
+		  timestampForNextNTPSync = millis();
+	  }
+	  else
+	  {
+		  // to handle when localTime goes past 86400s
+		  localTimeMs += AVG_MEASURED_MAIN_LOOP_DURATION_MS;
+		  localTime = localTimeMs / 1000;
+		  boardTimeMs = currentMillis;
+		  boardTime = boardTimeMs / 1000;
+	  }
 }
 
 
@@ -683,6 +721,7 @@ void setup()
   Serial.print("rel3_status: ");
   Serial.println(rel3_status);
 
+  timestampForNextNTPSync = millis();
 
 } //end of setup()
 
@@ -706,8 +745,8 @@ void loop()
         wifiDisconnectedCounter++;
       }
   }
-  currentMillis = millis();
-  //Serial.println(currentMillis);
+
+  updateLocalTimersInMainLoop();
 
 /*  if ((millis()/ONE_DAY_IN_MILISECONDS) > 30)
   {
@@ -753,8 +792,8 @@ void loop()
 
   if (!client)
   {
-    Serial.print("!client ");
-    Serial.println(cnt1);
+    //Serial.print("!client ");
+    //Serial.println(cnt1);
     cnt1++;
     delay(500);
     //return;
@@ -772,8 +811,8 @@ void loop()
     while(!client.available())
     {
         //delay(1);
-        Serial.print("!client.available() ");
-        Serial.println(cnt2);
+        //Serial.print("!client.available() ");
+        //Serial.println(cnt2);
         cnt2++;
         delay(500);
         if (cnt2 > 60)
@@ -1250,43 +1289,71 @@ void loop()
         {
         	// O tura aspersor spate 15 min
         	// rel1
-
-        	rel1_status = HIGH;
-			/*if (setEepromRel_1(rel1_status))
-			  client.println("EEPROM status saved OK.");
-			else
-			  client.println("Failed to save EEPROM status.");*/
-			digitalWrite(REL_1, rel1_status);
-
-        	#ifdef ASP
-        	                client.println("RELAY_1 is ON");
-        	                client.println("Aspersoare SPATE pornite pt 15min");
-        	#endif
-        	#ifdef DEVBABY1
-        	                client.println("LED_1 is ON");
-        	                client.println("for 15 minutes");
-        	#endif
-
-        	                client.println("");
-
-			/*if (syncWithNTP())
+        	if (timerInProgress != TRUE)
 			{
+				rel1_status = HIGH;
+				digitalWrite(REL_1, rel1_status);
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE pornite pt 15min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_1 is ON");
+								client.println("for 15 minutes");
+				#endif
+								client.println("");
+
+				/*if (syncWithNTP())
+				{
+					client.print("Local time (s) at program start: ");
+					client.println(localTime);
+				}
+				else
+				{
+					client.println("Failure, try again.");
+				}*/
+
+				programStartTime = millis()/1000;
 				client.print("Local time (s) at program start: ");
-				client.println(localTime);
+				client.println(programStartTime);
+				timerInProgress = TRUE;
+				loadsInProgress[0] = TRUE;
 			}
-			else
-			{
-				client.println("Failure, try again.");
-			}*/
-
-			programStartTime = millis()/1000;
-			client.print("Local time (s) at program start: ");
-			client.println(programStartTime);
-			timerInProgress = TRUE;
-			loadsInProgress[0] = TRUE;
-
+        	else
+        		client.println("This menu is already in progress, stop it first");
 
         }
+
+        if (request.indexOf("m1_stop") != -1)
+		{
+                	// O tura aspersor spate 15 min
+                	// rel1
+        	if (timerInProgress != FALSE)
+        	{
+                	rel1_status = LOW;
+        			digitalWrite(REL_1, rel1_status);
+
+                	#ifdef ASP
+                	                client.println("RELAY_1 is OFF");
+                	                client.println("Aspersoare SPATE oprite");
+                	#endif
+                	#ifdef DEVBABY1
+                	                client.println("LED_1 is OFF");
+                	#endif
+                	                client.println("");
+
+					//unsigned long delta = (millis()/1000) - programStartTime;
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - programStartTime);
+
+        			timerInProgress = FALSE;
+        			loadsInProgress[0] = FALSE;
+        	}
+        	else
+        		client.println("This menu is not in progress");
+
+		}
 
         if (request.indexOf("timers_status") != -1)
         {
@@ -1302,7 +1369,8 @@ void loop()
 
         		unsigned long delta = (millis()/1000) - programStartTime;
         		client.print("Seconds in progress: ");
-        		client.println(delta);
+				client.println(delta);
+
         	}
         	else
         		client.println("No programmed loads at this time.");
@@ -1317,10 +1385,24 @@ void loop()
       }
 
 
+  //Serial.print("Main loop millis: ");
+  //Serial.println(millis());
 
-
+  if (cnt<10)
+  {
+	  cnt++;
+  }
+  else
+  {
+  Serial.print("localTime: ");
+  Serial.println(localTime);
+  Serial.print("localTimeMs: ");
+  Serial.println(localTimeMs);
+  Serial.println("");
+  cnt=0;
+  }
 
   delay(1);
-  Serial.println("Client disonnected");
-  Serial.println("");
+  //Serial.println("Client disonnected");
+  //Serial.println("");
 }
