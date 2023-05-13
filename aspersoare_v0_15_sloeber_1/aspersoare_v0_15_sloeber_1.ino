@@ -67,7 +67,7 @@
  * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
  * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
 ****************************************************************/
-#define MENIU_25_LOCALTIME_START	82800
+#define MENIU_25_LOCALTIME_START	600
 #define MENIU_25_LOCALTIME_END		73500 // to be redefined
 
 //bool meniuAutomatInCurs = 0;
@@ -136,11 +136,12 @@ byte nbOfWifiConnectionLosses = 0;
 byte rel1_status = LOW;
 byte rel2_status = LOW;
 byte rel3_status = LOW;
-bool timerInProgress = FALSE;
-bool timerProgrammedOneTime = FALSE;
-bool loadsProgrammedOneTime[3] = {{FALSE}};
-bool timerProgrammedOneTimeStarted = FALSE;
-byte menuNumberProgrammed = 0;
+bool timerInProgress = FALSE; // refers to instant timer activation
+bool timerScheduledOneTime = FALSE;	// refers to 1-time scheduled activation
+bool loadsScheduledOneTime[3] = {{FALSE}}; // refers to 1-time scheduled activation
+bool timerScheduledOneTimeStarted = FALSE; // refers to 1-time scheduled activation
+byte menuNumberScheduled = 0;	// refers to 1-time scheduled activation
+byte menuNumberProgrammed = 0; // refers to instant timer activation
 
 byte loadsInProgress[3] = {{FALSE}};
 byte actualLoadInProgress = 0;
@@ -758,18 +759,17 @@ void loop()
 
   updateLocalTimersInMainLoop();
 
-  if (timerProgrammedOneTime != FALSE)
-  {	Serial.println("timerProgrammedOneTime != FALSE");
-	if (menuNumberProgrammed == 25)
-	{	Serial.println("menuNumberProgrammed == 25");
-		if (timerProgrammedOneTimeStarted == FALSE)	// programmed timer not yet started
+  // Handler for 1-time scheduled program
+  if (timerScheduledOneTime != FALSE)
+  {	Serial.println("timerScheduledOneTime != FALSE");
+	if (menuNumberScheduled == 25)	// Handler for menu Nb 25
+	{	Serial.println("menuNumberScheduled == 25");
+		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
 			if (localTime >= MENIU_25_LOCALTIME_START)
 			{	Serial.println("!!!!! localTime >= MENIU_25_LOCALTIME_START !!!!!!!!");
-				timerProgrammedOneTimeStarted = TRUE;
-				//rel1_status = HIGH;
-				//digitalWrite(REL_1, rel1_status);
-				timestampForNextLoadSwitch = localTime + 300;
+				timerScheduledOneTimeStarted = TRUE;
+				timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
 				actualLoadInProgress = 0;
 			}
 		}
@@ -784,34 +784,46 @@ void loop()
 
 			if (actualLoadInProgress == 0)
 			{
-            	rel1_status = HIGH;
-            	rel2_status = LOW;
-            	rel3_status = LOW;
+				if (loadsScheduledOneTime[0] == TRUE)
+				{
+					rel1_status = HIGH;
+				}
+				rel2_status = LOW;
+				rel3_status = LOW;
 			}
 
 			if (actualLoadInProgress == 1)
 			{
-            	rel1_status = LOW;
-            	rel2_status = HIGH;
-            	rel3_status = LOW;
+				rel1_status = LOW;
+				if (loadsScheduledOneTime[1] == TRUE)
+				{
+					rel2_status = HIGH;
+				}
+				rel3_status = LOW;
 			}
 
 			if (actualLoadInProgress == 2)
 			{
-            	rel1_status = LOW;
-            	rel2_status = LOW;
-            	rel3_status = HIGH;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				if (loadsScheduledOneTime[2] == TRUE)
+				{
+					rel3_status = HIGH;
+				}
 			}
 
 			if (actualLoadInProgress == 3)
 			{
-				timerProgrammedOneTime = FALSE;
+				timerScheduledOneTime = FALSE;
 				actualLoadInProgress = 0;
-				menuNumberProgrammed = 0;
-				timerProgrammedOneTimeStarted = FALSE;
+				menuNumberScheduled = 0;
+				timerScheduledOneTimeStarted = FALSE;
             	rel1_status = LOW;
             	rel2_status = LOW;
             	rel3_status = LOW;
+            	loadsScheduledOneTime[0] = FALSE;
+            	loadsScheduledOneTime[1] = FALSE;
+            	loadsScheduledOneTime[2] = FALSE;
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -819,8 +831,9 @@ void loop()
 			digitalWrite(REL_3, rel3_status);
 
 		}
-	}
-  }
+	}		// End of handler for menu Nb 25
+	//if (menuNumberScheduled == XX)	// Handler for menu Nb XX
+  } 	// End of handler for 1-time scheduled program
 
 
 
@@ -836,6 +849,7 @@ void loop()
 		  	  digitalWrite(REL_1, rel1_status);
 		  	  timerInProgress = FALSE;
 		  	  loadsInProgress[0] = FALSE;
+		  	  menuNumberProgrammed = 0;
 		  }
   }
 
@@ -1342,6 +1356,7 @@ void loop()
 			{
 				rel1_status = HIGH;
 				digitalWrite(REL_1, rel1_status);
+				menuNumberProgrammed = 1;
 
 				#ifdef ASP
 								client.println("RELAY_1 is ON");
@@ -1388,6 +1403,8 @@ void loop()
 
         			timerInProgress = FALSE;
         			loadsInProgress[0] = FALSE;
+        			menuNumberProgrammed = 0;
+
         	}
         	else
         		client.println("This menu is not in progress");
@@ -1397,10 +1414,6 @@ void loop()
         if (request.indexOf("meniu_25") != -1)
         {
         	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
-
-			if (timerInProgress != TRUE)
-			{
-
 
 				#ifdef ASP
 								client.println("RELAY_1 is ON");
@@ -1412,14 +1425,12 @@ void loop()
 				#endif
 								client.println("");
 
-				timerProgrammedOneTime = TRUE;
-				loadsProgrammedOneTime[0] = TRUE;
-				loadsProgrammedOneTime[1] = TRUE;
-				loadsProgrammedOneTime[2] = TRUE;
-				menuNumberProgrammed = 25;
-			}
-			else
-				client.println("A timer is already in progress, stop it first");
+				timerScheduledOneTime = TRUE;
+				loadsScheduledOneTime[0] = TRUE;
+				loadsScheduledOneTime[1] = TRUE;
+				loadsScheduledOneTime[2] = TRUE;
+				menuNumberScheduled = 25;
+
 
         }
 
