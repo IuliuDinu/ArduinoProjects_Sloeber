@@ -65,10 +65,13 @@
  * "meniu_22" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 20 min
  * "meniu_23" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 25 min
  * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
+ * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
 ****************************************************************/
+#define MENIU_25_LOCALTIME_START	82800
+#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 
-bool meniuAutomatInCurs = 0;
-bool meniuProgramatInCurs = 0;
+//bool meniuAutomatInCurs = 0;
+//bool meniuProgramatInCurs = 0;
 unsigned int nrMeniuAutomat = 0;
 
 
@@ -133,9 +136,14 @@ byte nbOfWifiConnectionLosses = 0;
 byte rel1_status = LOW;
 byte rel2_status = LOW;
 byte rel3_status = LOW;
-byte timerInProgress = FALSE;
+bool timerInProgress = FALSE;
+bool timerProgrammedOneTime = FALSE;
+bool loadsProgrammedOneTime[3] = {{FALSE}};
+bool timerProgrammedOneTimeStarted = FALSE;
+byte menuNumberProgrammed = 0;
 
 byte loadsInProgress[3] = {{FALSE}};
+byte actualLoadInProgress = 0;
 
 //Week Days
 String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
@@ -164,6 +172,8 @@ unsigned long wifiConnectedTimeBySystemTime;
 unsigned long programStartTime = 0;
 unsigned long timestampForNextNTPSync = 0;
 unsigned char cnt = 0;
+unsigned long timestampForNextLoadSwitch = 0;
+
 
 bool gb_timeIsSynced = 0;
 bool gb_timeHasToBeSynced = 1;
@@ -748,38 +758,77 @@ void loop()
 
   updateLocalTimersInMainLoop();
 
-/*  if ((millis()/ONE_DAY_IN_MILISECONDS) > 30)
-  {
-    byte nbofresets;
-    nbofresets = EEPROM.read(0);
-    nbofresets++;
-    EEPROM.write(0, nbofresets);
-    EEPROM.commit();
-    ESP.restart();
-  }*/
+  if (timerProgrammedOneTime != FALSE)
+  {	Serial.println("timerProgrammedOneTime != FALSE");
+	if (menuNumberProgrammed == 25)
+	{	Serial.println("menuNumberProgrammed == 25");
+		if (timerProgrammedOneTimeStarted == FALSE)	// programmed timer not yet started
+		{
+			if (localTime >= MENIU_25_LOCALTIME_START)
+			{	Serial.println("!!!!! localTime >= MENIU_25_LOCALTIME_START !!!!!!!!");
+				timerProgrammedOneTimeStarted = TRUE;
+				//rel1_status = HIGH;
+				//digitalWrite(REL_1, rel1_status);
+				timestampForNextLoadSwitch = localTime + 300;
+				actualLoadInProgress = 0;
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((localTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = localTime + 300;
+				actualLoadInProgress++;
 
-  //updateLocalTime();
-  //convertFromSecToStructHMS(localTime, &gs_localClock);
-  //if ((gs_localClock.h == 20) && (gs_localClock.m == 47) && (gs_localClock.s > 0) && (gs_localClock.s < 10))
- /* if (((localTime > 0)&&(localTime < 10)) || ((localTime > 32400)&&(localTime < 32410)) || ((localTime > 43200)&&(localTime < 43210)) || ((localTime > 54000)&&(localTime < 54010)) || ((localTime > 64800)&&(localTime < 64810)) || ((localTime > 75600)&&(localTime < 75610)))
-  {
-    gb_timeIsSynced = 0;
-    delay(15000);
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+            	rel1_status = HIGH;
+            	rel2_status = LOW;
+            	rel3_status = LOW;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+            	rel1_status = LOW;
+            	rel2_status = HIGH;
+            	rel3_status = LOW;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+            	rel1_status = LOW;
+            	rel2_status = LOW;
+            	rel3_status = HIGH;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				timerProgrammedOneTime = FALSE;
+				actualLoadInProgress = 0;
+				menuNumberProgrammed = 0;
+				timerProgrammedOneTimeStarted = FALSE;
+            	rel1_status = LOW;
+            	rel2_status = LOW;
+            	rel3_status = LOW;
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+
+		}
+	}
   }
 
-  if (!gb_timeIsSynced)
-  {
-    syncWithNTP();
-    updateLocalTime();
-    gb_timeIsSynced = 1;
-    gui_nbOfNTPsyncs++;
-  }*/
+
 
   ArduinoOTA.handle(); // OTA usage
 
   WiFiClient client = server.available();
 
-  if (timerInProgress != FALSE)
+  if ((menuNumberProgrammed == 1) && (timerInProgress != FALSE))
   {
 	  if (((currentMillis/1000)-programStartTime) > 900 )
 		  {
@@ -1304,16 +1353,6 @@ void loop()
 				#endif
 								client.println("");
 
-				/*if (syncWithNTP())
-				{
-					client.print("Local time (s) at program start: ");
-					client.println(localTime);
-				}
-				else
-				{
-					client.println("Failure, try again.");
-				}*/
-
 				programStartTime = millis()/1000;
 				client.print("Local time (s) at program start: ");
 				client.println(programStartTime);
@@ -1321,7 +1360,7 @@ void loop()
 				loadsInProgress[0] = TRUE;
 			}
         	else
-        		client.println("This menu is already in progress, stop it first");
+        		client.println("A timer is already in progress, stop it first");
 
         }
 
@@ -1354,6 +1393,35 @@ void loop()
         		client.println("This menu is not in progress");
 
 		}
+
+        if (request.indexOf("meniu_25") != -1)
+        {
+        	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
+
+			if (timerInProgress != TRUE)
+			{
+
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
+				#endif
+				#ifdef DEVBABY1
+								//client.println("LED_1 is ON");
+								client.println("LED_1, then LED_2, then LED_3 turned on for 5min each, beginning XX:XX");
+				#endif
+								client.println("");
+
+				timerProgrammedOneTime = TRUE;
+				loadsProgrammedOneTime[0] = TRUE;
+				loadsProgrammedOneTime[1] = TRUE;
+				loadsProgrammedOneTime[2] = TRUE;
+				menuNumberProgrammed = 25;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+        }
 
         if (request.indexOf("timers_status") != -1)
         {
