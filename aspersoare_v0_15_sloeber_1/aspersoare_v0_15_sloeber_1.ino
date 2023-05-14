@@ -66,9 +66,13 @@
  * "meniu_23" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 25 min
  * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
  * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
+ * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
+ * "meniu_30" - O tura programata de la ora X pana la ora Y, pt LED_1 (rel_1)
 ****************************************************************/
-#define MENIU_25_LOCALTIME_START	600
-#define MENIU_25_LOCALTIME_END		73500 // to be redefined
+#define MENIU_25_LOCALTIME_START	85200
+//#define MENIU_25_LOCALTIME_END		73500 // to be redefined
+#define MENIU_30_LOCALTIME_START	84600
+#define MENIU_30_LOCALTIME_END		84900
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -138,9 +142,12 @@ byte rel2_status = LOW;
 byte rel3_status = LOW;
 bool timerInProgress = FALSE; // refers to instant timer activation
 bool timerScheduledOneTime = FALSE;	// refers to 1-time scheduled activation
+bool timerScheduledOneTimeXtoY = FALSE;	// refers to 1-time scheduled activation, time X to Y, only 1 load
 bool loadsScheduledOneTime[3] = {{FALSE}}; // refers to 1-time scheduled activation
+bool loadsScheduledOneTimeXtoY[3] = {{FALSE}}; // refers to 1-time scheduled activation, time X to Y, only 1 load
 bool timerScheduledOneTimeStarted = FALSE; // refers to 1-time scheduled activation
 byte menuNumberScheduled = 0;	// refers to 1-time scheduled activation
+byte menuNumberScheduledXtoY = 0;	// refers to 1-time scheduled activation, time X to Y, only 1 load
 byte menuNumberProgrammed = 0; // refers to instant timer activation
 
 byte loadsInProgress[3] = {{FALSE}};
@@ -759,7 +766,7 @@ void loop()
 
   updateLocalTimersInMainLoop();
 
-  // Handler for 1-time scheduled program
+  // Handlers for 1-time scheduled program, one or multiple loads (but in order):
   if (timerScheduledOneTime != FALSE)
   {	Serial.println("timerScheduledOneTime != FALSE");
 	if (menuNumberScheduled == 25)	// Handler for menu Nb 25
@@ -787,29 +794,32 @@ void loop()
 				if (loadsScheduledOneTime[0] == TRUE)
 				{
 					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
 				}
-				rel2_status = LOW;
-				rel3_status = LOW;
+				else actualLoadInProgress++;
 			}
 
 			if (actualLoadInProgress == 1)
 			{
-				rel1_status = LOW;
 				if (loadsScheduledOneTime[1] == TRUE)
 				{
+					rel1_status = LOW;
 					rel2_status = HIGH;
+					rel3_status = LOW;
 				}
-				rel3_status = LOW;
+				else actualLoadInProgress++;
 			}
 
 			if (actualLoadInProgress == 2)
 			{
-				rel1_status = LOW;
-				rel2_status = LOW;
 				if (loadsScheduledOneTime[2] == TRUE)
 				{
+					rel1_status = LOW;
+					rel2_status = LOW;
 					rel3_status = HIGH;
 				}
+				else actualLoadInProgress++;
 			}
 
 			if (actualLoadInProgress == 3)
@@ -833,14 +843,53 @@ void loop()
 		}
 	}		// End of handler for menu Nb 25
 	//if (menuNumberScheduled == XX)	// Handler for menu Nb XX
-  } 	// End of handler for 1-time scheduled program
+  } 	// End of handlers for 1-time scheduled program
 
+  // Handlers for 1-time scheduled program from X to Y time, only one load programs:
+  if (timerScheduledOneTimeXtoY != FALSE)
+  {	Serial.println("timerScheduledOneTimeXtoY != FALSE");
+	if (menuNumberScheduledXtoY == 30)	// Handler for menu Nb 30, only rel_2
+	{	Serial.println("menuNumberScheduled == 30");
+		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
+		{
+			if (localTime >= MENIU_30_LOCALTIME_START)
+			{	Serial.println("!!!!! localTime >= MENIU_30_LOCALTIME_START !!!!!!!!");
+				timerScheduledOneTimeStarted = TRUE;
+				//timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
+			}
+		}
+		else	// programmed timer has already started
+		{
+			Serial.println("IN PROGRESS");
+			if (localTime >= MENIU_30_LOCALTIME_END)
+			{
+				timerScheduledOneTimeXtoY = FALSE;
+				menuNumberScheduledXtoY = 0;
+				timerScheduledOneTimeStarted = FALSE;
+				loadsScheduledOneTimeXtoY[0] = FALSE;
+				loadsScheduledOneTimeXtoY[1] = FALSE;
+				loadsScheduledOneTimeXtoY[2] = FALSE;
+			}
+
+			rel1_status = loadsScheduledOneTimeXtoY[0];
+			rel2_status = loadsScheduledOneTimeXtoY[1];
+			rel3_status = loadsScheduledOneTimeXtoY[2];
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+
+		}
+	}		// End of handler for menu Nb 30
+	//if (menuNumberScheduled == XX)	// Handler for menu Nb XX
+  } 	// End handlers of for 1-time scheduled program from X to Y time, only one load programs:
 
 
   ArduinoOTA.handle(); // OTA usage
 
   WiFiClient client = server.available();
 
+  // Handlers for instant timer activation:
   if ((menuNumberProgrammed == 1) && (timerInProgress != FALSE))
   {
 	  if (((currentMillis/1000)-programStartTime) > 900 )
@@ -852,6 +901,7 @@ void loop()
 		  	  menuNumberProgrammed = 0;
 		  }
   }
+  // End of handlers for instant timer activation
 
   if (!client)
   {
@@ -1430,8 +1480,27 @@ void loop()
 				loadsScheduledOneTime[1] = TRUE;
 				loadsScheduledOneTime[2] = TRUE;
 				menuNumberScheduled = 25;
+        }
 
+        if (request.indexOf("meniu_30") != -1)
+        {
+        	// O tura REL_2, de la ora X la ora Y
 
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
+				#endif
+				#ifdef DEVBABY1
+								//client.println("LED_1 is ON");
+								client.println("LED_2 turned on from time X to Y");
+				#endif
+								client.println("");
+
+				timerScheduledOneTimeXtoY = TRUE;
+				loadsScheduledOneTimeXtoY[0] = FALSE;
+				loadsScheduledOneTimeXtoY[1] = TRUE;
+				loadsScheduledOneTimeXtoY[2] = FALSE;
+				menuNumberScheduledXtoY = 30;
         }
 
         if (request.indexOf("timers_status") != -1)
