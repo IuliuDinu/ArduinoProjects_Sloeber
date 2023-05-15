@@ -73,8 +73,8 @@
 //#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 #define MENIU_30_LOCALTIME_START	84600
 #define MENIU_30_LOCALTIME_END		84900
-#define MENIU_40_LOCALTIME_START	84900
-#define MENIU_40_LOCALTIME_END		85200
+#define MENIU_40_LOCALTIME_START	1800
+#define MENIU_40_LOCALTIME_END		2100
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -934,6 +934,12 @@ void loop()
 			if (localTime >= MENIU_40_LOCALTIME_END)
 			{
 				timerScheduledDailyStarted = FALSE;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				rel2_status = LOW;
+				digitalWrite(REL_1, rel1_status);
+				digitalWrite(REL_2, rel2_status);
+				digitalWrite(REL_3, rel3_status);
 			}
 
 		}
