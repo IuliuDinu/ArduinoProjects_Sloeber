@@ -67,12 +67,14 @@
  * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
  * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
  * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
- * "meniu_30" - O tura programata de la ora X pana la ora Y, pt LED_1 (rel_1)
+ * "meniu_30" - O tura programata de la ora X pana la ora Y, o singura data, pt LED_1 (rel_1)
 ****************************************************************/
 #define MENIU_25_LOCALTIME_START	85200
 //#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 #define MENIU_30_LOCALTIME_START	84600
 #define MENIU_30_LOCALTIME_END		84900
+#define MENIU_40_LOCALTIME_START	84900
+#define MENIU_40_LOCALTIME_END		85200
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -91,8 +93,13 @@ unsigned int nrMeniuAutomat = 0;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
 
-#if defined (DEVBABY1x) || defined (ASP)
+#if defined (DEVBABY1x) || defined (ASPx)
 const char* ssid = "Gorlitze";
+const char* password = "A1b2C3d4";
+#endif
+
+#ifdef ASP // we use multiple connection options for ASP
+const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
@@ -142,12 +149,18 @@ byte rel2_status = LOW;
 byte rel3_status = LOW;
 bool timerInProgress = FALSE; // refers to instant timer activation
 bool timerScheduledOneTime = FALSE;	// refers to 1-time scheduled activation
+bool timerScheduledDaily = FALSE;	// refers to daily scheduled activation
 bool timerScheduledOneTimeXtoY = FALSE;	// refers to 1-time scheduled activation, time X to Y, only 1 load
+bool timerScheduledDailyXtoY = FALSE;	// refers to daily scheduled activation, time X to Y, only 1 load
 bool loadsScheduledOneTime[3] = {{FALSE}}; // refers to 1-time scheduled activation
+bool loadsScheduledDaily[3] = {{FALSE}}; // refers to daily scheduled activation
 bool loadsScheduledOneTimeXtoY[3] = {{FALSE}}; // refers to 1-time scheduled activation, time X to Y, only 1 load
+bool loadsScheduledDailyXtoY[3] = {{FALSE}}; // refers to daily scheduled activation, time X to Y, only 1 load
 bool timerScheduledOneTimeStarted = FALSE; // refers to 1-time scheduled activation
+bool timerScheduledDailyStarted = FALSE; // refers to daily scheduled activation
 byte menuNumberScheduled = 0;	// refers to 1-time scheduled activation
 byte menuNumberScheduledXtoY = 0;	// refers to 1-time scheduled activation, time X to Y, only 1 load
+byte menuNumberScheduledDailyXtoY = 0;	// refers to daily scheduled activation, time X to Y, only 1 load; TO BE SWITCHED TO ARRAY
 byte menuNumberProgrammed = 0; // refers to instant timer activation
 
 byte loadsInProgress[3] = {{FALSE}};
@@ -617,8 +630,17 @@ void setup()
   }
 #endif
 
-#ifdef ASP
+#ifdef ASPx
   if (connectedIP != 1040296128) // which means 192.168.1.62
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ASP
+  if (connectedIP != 1040296384) // which means 192.169.1.62 - for Kaon
   {
     Serial.println("Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
@@ -883,6 +905,41 @@ void loop()
 	}		// End of handler for menu Nb 30
 	//if (menuNumberScheduled == XX)	// Handler for menu Nb XX
   } 	// End handlers of for 1-time scheduled program from X to Y time, only one load programs:
+
+  // Handlers for daily scheduled program from X to Y time, only one load programs:
+  if (timerScheduledDailyXtoY != FALSE)
+  {	Serial.println("timerScheduledDailyXtoY != FALSE");
+	if (menuNumberScheduledDailyXtoY == 40)	// Handler for menu Nb 40, only rel_2
+	{	Serial.println("menuNumberScheduled == 40");
+		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_40_LOCALTIME_START) && (localTime < MENIU_40_LOCALTIME_END))
+			{	Serial.println("!!!!! localTime >= MENIU_40_LOCALTIME_START !!!!!!!!");
+				timerScheduledDailyStarted = TRUE;
+				//timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
+			}
+		}
+		else	// programmed timer has already started
+		{
+			Serial.println("IN PROGRESS");
+
+			rel1_status = loadsScheduledDailyXtoY[0];
+			rel2_status = loadsScheduledDailyXtoY[1];
+			rel3_status = loadsScheduledDailyXtoY[2];
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+
+			if (localTime >= MENIU_40_LOCALTIME_END)
+			{
+				timerScheduledDailyStarted = FALSE;
+			}
+
+		}
+	}		// End of handler for menu Nb 40
+	//if (menuNumberScheduled == XX)	// Handler for menu Nb XX
+  } 	// End handlers of for daily scheduled program from X to Y time, only one load programs:
 
 
   ArduinoOTA.handle(); // OTA usage
@@ -1502,6 +1559,52 @@ void loop()
 				loadsScheduledOneTimeXtoY[2] = FALSE;
 				menuNumberScheduledXtoY = 30;
         }
+
+        if (request.indexOf("meniu_40") != -1)
+		{
+			// Zilnic REL_2, de la ora X la ora Y
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_2 turned on daily from time X to Y");
+				#endif
+				#ifdef ESPBOX1
+								client.println("Lampa spate pornita zilnic de la 20:30 la 00:00");
+				#endif
+								client.println("");
+
+				timerScheduledDailyXtoY = TRUE;		// Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[0] = FALSE;	// Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[1] = TRUE;	// Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[2] = FALSE;	// Must be stored in EEPROM!!!
+				menuNumberScheduledDailyXtoY = 40;	// Must be stored in EEPROM!!!
+		}
+
+        if (request.indexOf("m40_stop") != -1)
+		{
+			// Dezactiveaza meniu 40
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_2 turned on daily from time X to Y");
+				#endif
+				#ifdef ESPBOX1
+								client.println("Lampa spate pornita zilnic de la 20:30 la 00:00");
+				#endif
+								client.println("");
+
+				timerScheduledDailyXtoY = FALSE;		// Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[0] = FALSE; // Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[1] = FALSE;  // Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[2] = FALSE; // Must be stored in EEPROM!!!
+				menuNumberScheduledDailyXtoY = 0;  // Must be stored in EEPROM!!!
+		}
 
         if (request.indexOf("timers_status") != -1)
         {
