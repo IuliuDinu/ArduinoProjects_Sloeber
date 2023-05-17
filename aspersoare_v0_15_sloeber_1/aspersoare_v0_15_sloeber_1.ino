@@ -75,8 +75,8 @@
 //#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 #define MENIU_30_LOCALTIME_START	84600
 #define MENIU_30_LOCALTIME_END		84900
-#define MENIU_40_LOCALTIME_START	1800
-#define MENIU_40_LOCALTIME_END		2700
+#define MENIU_40_LOCALTIME_START	40500
+#define MENIU_40_LOCALTIME_END		42300
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -315,6 +315,18 @@ void updateLocalTime()
   syncTime = gul_max24hMillis/1000;
 }
 
+byte eepromInitParticularByte(byte address)
+{
+	byte status = 0;
+	EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //N bytes used
+	delay(100);
+	EEPROM.write(address, 0);
+	delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
 void eepromEraseAllDefinedBytes()
 {
 	int i;
@@ -530,6 +542,7 @@ void setup()
    //eepromEraseAddr01();
    //eepromEraseRelLastState();
 	//eepromEraseAllDefinedBytes();
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
    wifiDisconnectedLoopCounter = 0;
    wifiDisconnectedCounter = 0;
 
