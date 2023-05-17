@@ -27,10 +27,11 @@
 #define EEPROM_ADDR_REL_3_LAST_STATE           	6
 #define EEPROM_ADDR_REL_3_LAST_STATE_INV       	7
 #define EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS	   	8
-#define EEPROM_ADDR_MENU_IN_PROGRESS		   	9
-#define EEPROM_ADDR_LAST_MENU_USED			   	10
+#define EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y	9
+#define EEPROM_ADDR_MENU_IN_PROGRESS		   	10
+#define EEPROM_ADDR_LAST_MENU_USED			   	11
 
- #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       9
+ #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       10
 
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
@@ -75,8 +76,8 @@
 //#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 #define MENIU_30_LOCALTIME_START	84600
 #define MENIU_30_LOCALTIME_END		84900
-#define MENIU_40_LOCALTIME_START	40500
-#define MENIU_40_LOCALTIME_END		42300
+#define MENIU_40_LOCALTIME_START	27000
+#define MENIU_40_LOCALTIME_END		31500
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -315,12 +316,29 @@ void updateLocalTime()
   syncTime = gul_max24hMillis/1000;
 }
 
+
 byte eepromInitParticularByte(byte address)
 {
 	byte status = 0;
 	EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //N bytes used
 	delay(100);
 	EEPROM.write(address, 0);
+	delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte eepromInitParticularBytesFromTo(byte address_from, byte address_to)
+{
+	byte i;
+	byte status = 0;
+	EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //N bytes used
+	delay(100);
+	for (i = address_from; i <= address_to; i++)
+	{
+		EEPROM.write(i, 0);
+	}
 	delay(100);
     status = EEPROM.commit();
     delay(100);
@@ -384,7 +402,6 @@ byte setEepromRel_1(byte state)
     delay(100);
     status = EEPROM.commit();
     delay(100);
-    //status = 1;
     return status;
 }
 
@@ -399,7 +416,6 @@ byte setEepromRel_2(byte state)
     delay(100);
     status = EEPROM.commit();
     delay(100);
-    //status = 1;
     return status;
 }
 
@@ -414,7 +430,6 @@ byte setEepromRel_3(byte state)
     delay(100);
     status = EEPROM.commit();
     delay(100);
-    //status = 1;
     return status;
 }
 
@@ -437,7 +452,84 @@ byte setEeprom_timerScheduledDailyXtoY(bool state)
     delay(100);
     status = EEPROM.commit();
     delay(100);
-    //status = 1;
+    return status;
+}
+
+byte setEeprom_loadsScheduledDailyXtoY_0(bool state)
+{
+    byte status = 0;
+    byte temp = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+    if (state == TRUE) 	// set bit 1
+    {
+    	temp = temp | (0b00000010);
+    }
+    else				// reset bit 1
+    {
+    	temp = temp & (0b11111101);
+    }
+    EEPROM.write(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS, temp);
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_loadsScheduledDailyXtoY_1(bool state)
+{
+    byte status = 0;
+    byte temp = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+    if (state == TRUE) 	// set bit 2
+    {
+    	temp = temp | (0b00000100);
+    }
+    else				// reset bit 2
+    {
+    	temp = temp & (0b11111011);
+    }
+    EEPROM.write(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS, temp);
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_loadsScheduledDailyXtoY_2(bool state)
+{
+    byte status = 0;
+    byte temp = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+    if (state == TRUE) 	// set bit 3
+    {
+    	temp = temp | (0b00001000);
+    }
+    else				// reset bit 3
+    {
+    	temp = temp & (0b11110111);
+    }
+    EEPROM.write(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS, temp);
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_menuNumberScheduledDailyXtoY(byte val)
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y, val);
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
     return status;
 }
 
@@ -506,6 +598,65 @@ bool getEeprom_timerScheduledDailyXtoY()
   Serial.println(temp);
   state = (bool)(temp & 0b00000001);
   return state;
+}
+
+bool getEeprom_loadsScheduledDailyXtoY_0()
+{
+  bool val;
+  byte temp = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+  delay(100);
+  Serial.print("EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS: ");
+  Serial.println(temp);
+  val = (bool)((temp & 0b00000010)>>1);
+  return val;
+}
+
+bool getEeprom_loadsScheduledDailyXtoY_1()
+{
+  bool val;
+  byte temp = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+  delay(100);
+  Serial.print("EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS: ");
+  Serial.println(temp);
+  val = (bool)((temp & 0b00000100)>>2);
+  return val;
+}
+
+bool getEeprom_loadsScheduledDailyXtoY_2()
+{
+  bool val;
+  byte temp = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  temp = EEPROM.read(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+  delay(100);
+  Serial.print("EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS: ");
+  Serial.println(temp);
+  val = (bool)((temp & 0b00001000)>>3);
+  return val;
+}
+
+byte getEeprom_menuNumberScheduledDailyXtoY()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y);
+  delay(100);
+  Serial.print("EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y: ");
+  Serial.println(val);
+  return val;
+}
+
+void loadTimersDataFromEEPROM()
+{
+	timerScheduledDailyXtoY = getEeprom_timerScheduledDailyXtoY();
+	loadsScheduledDailyXtoY[0] = getEeprom_loadsScheduledDailyXtoY_0();
+	loadsScheduledDailyXtoY[1] = getEeprom_loadsScheduledDailyXtoY_1();
+	loadsScheduledDailyXtoY[2] = getEeprom_loadsScheduledDailyXtoY_2();
+	menuNumberScheduledDailyXtoY = getEeprom_menuNumberScheduledDailyXtoY();
 }
 
 void updateLocalTimersInMainLoop()
@@ -808,6 +959,9 @@ void setup()
   Serial.println(rel2_status);
   Serial.print("rel3_status: ");
   Serial.println(rel3_status);
+
+  //load EEPROM values related to timer scheduled daily from X to Y
+  loadTimersDataFromEEPROM();
 
   timestampForNextNTPSync = millis();
 
@@ -1630,12 +1784,16 @@ void loop()
 				#endif
 								client.println("");
 
-				timerScheduledDailyXtoY = TRUE;		// Must be stored in EEPROM!!!
+				timerScheduledDailyXtoY = TRUE;		// Must be stored in EEPROM
 				setEeprom_timerScheduledDailyXtoY(timerScheduledDailyXtoY);
-				loadsScheduledDailyXtoY[0] = FALSE;	// Must be stored in EEPROM!!!
-				loadsScheduledDailyXtoY[1] = TRUE;	// Must be stored in EEPROM!!!
-				loadsScheduledDailyXtoY[2] = FALSE;	// Must be stored in EEPROM!!!
-				menuNumberScheduledDailyXtoY = 40;	// Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[0] = TRUE;	// Must be stored in EEPROM
+				setEeprom_loadsScheduledDailyXtoY_0(loadsScheduledDailyXtoY[0]);
+				loadsScheduledDailyXtoY[1] = FALSE;	// Must be stored in EEPROM
+				setEeprom_loadsScheduledDailyXtoY_1(loadsScheduledDailyXtoY[1]);
+				loadsScheduledDailyXtoY[2] = TRUE;	// Must be stored in EEPROM
+				setEeprom_loadsScheduledDailyXtoY_2(loadsScheduledDailyXtoY[2]);
+				menuNumberScheduledDailyXtoY = 40;	// Must be stored in EEPROM
+				setEeprom_menuNumberScheduledDailyXtoY(menuNumberScheduledDailyXtoY);
 				getEeprom_timerScheduledDailyXtoY();
 		}
 
@@ -1655,12 +1813,16 @@ void loop()
 				#endif
 								client.println("");
 
-				timerScheduledDailyXtoY = FALSE;		// Must be stored in EEPROM!!! - bit 0 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
+				timerScheduledDailyXtoY = FALSE;		// Must be stored in EEPROM - bit 0 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
 				setEeprom_timerScheduledDailyXtoY(timerScheduledDailyXtoY);
-				loadsScheduledDailyXtoY[0] = FALSE; // Must be stored in EEPROM!!! - bit 1 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
-				loadsScheduledDailyXtoY[1] = FALSE;  // Must be stored in EEPROM!!! - bit 2 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
-				loadsScheduledDailyXtoY[2] = FALSE; // Must be stored in EEPROM!!! - bit 3 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
-				menuNumberScheduledDailyXtoY = 0;  // Must be stored in EEPROM!!!
+				loadsScheduledDailyXtoY[0] = FALSE; // Must be stored in EEPROM - bit 1 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
+				setEeprom_loadsScheduledDailyXtoY_0(loadsScheduledDailyXtoY[0]);
+				loadsScheduledDailyXtoY[1] = FALSE;  // Must be stored in EEPROM - bit 2 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
+				setEeprom_loadsScheduledDailyXtoY_1(loadsScheduledDailyXtoY[1]);
+				loadsScheduledDailyXtoY[2] = FALSE; // Must be stored in EEPROM - bit 3 of EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS
+				setEeprom_loadsScheduledDailyXtoY_2(loadsScheduledDailyXtoY[2]);
+				menuNumberScheduledDailyXtoY = 0;  // Must be stored in EEPROM - EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y
+				setEeprom_menuNumberScheduledDailyXtoY(menuNumberScheduledDailyXtoY);
 				getEeprom_timerScheduledDailyXtoY();
 		}
 
