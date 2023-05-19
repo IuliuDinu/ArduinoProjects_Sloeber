@@ -76,18 +76,18 @@
 //#define MENIU_25_LOCALTIME_END		73500 // to be redefined
 #define MENIU_30_LOCALTIME_START	84600
 #define MENIU_30_LOCALTIME_END		84900
-#define MENIU_40_LOCALTIME_START	27000
-#define MENIU_40_LOCALTIME_END		31500
+#define MENIU_40_LOCALTIME_START	75600
+#define MENIU_40_LOCALTIME_END		86340
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
 unsigned int nrMeniuAutomat = 0;
 
 
-#define DEVBABY1 // DEVBABY1 board
+//#define DEVBABY1 // DEVBABY1 board
 //#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
-//#define ESPBOX1	// controller lumini spate
+#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
 
 //ESP8266WiFiMulti wifiMulti; // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
@@ -161,6 +161,7 @@ bool loadsScheduledOneTimeXtoY[3] = {{FALSE}}; // refers to 1-time scheduled act
 bool loadsScheduledDailyXtoY[3] = {{FALSE}}; // refers to daily scheduled activation, time X to Y, only 1 load
 bool timerScheduledOneTimeStarted = FALSE; // refers to 1-time scheduled activation
 bool timerScheduledDailyStarted = FALSE; // refers to daily scheduled activation
+bool timerScheduledDailyXtoYLoadHasBeenSwitchedOn = FALSE;
 byte menuNumberScheduled = 0;	// refers to 1-time scheduled activation
 byte menuNumberScheduledXtoY = 0;	// refers to 1-time scheduled activation, time X to Y, only 1 load
 byte menuNumberScheduledDailyXtoY = 0;	// refers to daily scheduled activation, time X to Y, only 1 load; TO BE SWITCHED TO ARRAY
@@ -693,7 +694,7 @@ void setup()
    //eepromEraseAddr01();
    //eepromEraseRelLastState();
 	//eepromEraseAllDefinedBytes();
-	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+	eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
    wifiDisconnectedLoopCounter = 0;
    wifiDisconnectedCounter = 0;
 
@@ -961,7 +962,7 @@ void setup()
   Serial.println(rel3_status);
 
   //load EEPROM values related to timer scheduled daily from X to Y
-  loadTimersDataFromEEPROM();
+  //loadTimersDataFromEEPROM();
 
   timestampForNextNTPSync = millis();
 
@@ -1110,38 +1111,43 @@ void loop()
 
   // Handlers for daily scheduled program from X to Y time, only one load programs:
   if (timerScheduledDailyXtoY != FALSE)
-  {	Serial.println("timerScheduledDailyXtoY != FALSE");
+  {	//Serial.println("timerScheduledDailyXtoY != FALSE");
 	if (menuNumberScheduledDailyXtoY == 40)	// Handler for menu Nb 40, only rel_2
-	{	Serial.println("menuNumberScheduled == 40");
+	{	//Serial.println("menuNumberScheduled == 40");
 		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
 		{
 			if ((localTime >= MENIU_40_LOCALTIME_START) && (localTime < MENIU_40_LOCALTIME_END))
-			{	Serial.println("!!!!! localTime >= MENIU_40_LOCALTIME_START !!!!!!!!");
+			{	//Serial.println("!!!!! localTime >= MENIU_40_LOCALTIME_START !!!!!!!!");
 				timerScheduledDailyStarted = TRUE;
 				//timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
 			}
 		}
 		else	// programmed timer has already started
 		{
-			Serial.println("IN PROGRESS");
+			//Serial.println("IN PROGRESS");
 
-			rel1_status = loadsScheduledDailyXtoY[0];
-			rel2_status = loadsScheduledDailyXtoY[1];
-			rel3_status = loadsScheduledDailyXtoY[2];
+			if (timerScheduledDailyXtoYLoadHasBeenSwitchedOn == FALSE)
+			{
+				//rel1_status = loadsScheduledDailyXtoY[0];
+				rel2_status = loadsScheduledDailyXtoY[1];
+				//rel3_status = loadsScheduledDailyXtoY[2];
 
-			digitalWrite(REL_1, rel1_status);
-			digitalWrite(REL_2, rel2_status);
-			digitalWrite(REL_3, rel3_status);
+				//digitalWrite(REL_1, rel1_status);
+				digitalWrite(REL_2, rel2_status);
+				//digitalWrite(REL_3, rel3_status);
+				timerScheduledDailyXtoYLoadHasBeenSwitchedOn = TRUE;
+			}
 
 			if (localTime >= MENIU_40_LOCALTIME_END)
 			{
 				timerScheduledDailyStarted = FALSE;
-				rel1_status = LOW;
+				//rel1_status = LOW;
 				rel2_status = LOW;
-				rel2_status = LOW;
-				digitalWrite(REL_1, rel1_status);
+				//rel3_status = LOW;
+				//digitalWrite(REL_1, rel1_status);
 				digitalWrite(REL_2, rel2_status);
-				digitalWrite(REL_3, rel3_status);
+				//digitalWrite(REL_3, rel3_status);
+				timerScheduledDailyXtoYLoadHasBeenSwitchedOn = FALSE;
 			}
 
 		}
@@ -1432,6 +1438,8 @@ void loop()
         	client.println("rel3on (buton FA ON) - lampa laterala ON");
         	client.println("rel3off (buton FA OFF) - lampa laterala OFF");
         	client.println("checktime - apeleaza NTP");
+        	client.println("meniu_40 - Lampa spate pornita zilnic de la 21:00 la 23:59");
+        	client.println("m40_stop - ANULARE PROGRAM: Lampa spate pornita zilnic de la 21:00 la 23:59");
         	client.println("boardTime - [sec] timp dupa reset");
         	client.println("localtime - experimental");
         	client.println("SystemRestart (buton RESET) - Reset sistem");
@@ -1780,7 +1788,7 @@ void loop()
 								client.println("LED_2 turned on daily from time X to Y");
 				#endif
 				#ifdef ESPBOX1
-								client.println("Lampa spate pornita zilnic de la 20:30 la 00:00");
+								client.println("Lampa spate pornita zilnic de la 21:00 la 23:59");
 				#endif
 								client.println("");
 
@@ -1788,7 +1796,7 @@ void loop()
 				setEeprom_timerScheduledDailyXtoY(timerScheduledDailyXtoY);
 				loadsScheduledDailyXtoY[0] = TRUE;	// Must be stored in EEPROM
 				setEeprom_loadsScheduledDailyXtoY_0(loadsScheduledDailyXtoY[0]);
-				loadsScheduledDailyXtoY[1] = FALSE;	// Must be stored in EEPROM
+				loadsScheduledDailyXtoY[1] = TRUE;	// Must be stored in EEPROM
 				setEeprom_loadsScheduledDailyXtoY_1(loadsScheduledDailyXtoY[1]);
 				loadsScheduledDailyXtoY[2] = TRUE;	// Must be stored in EEPROM
 				setEeprom_loadsScheduledDailyXtoY_2(loadsScheduledDailyXtoY[2]);
@@ -1806,10 +1814,10 @@ void loop()
 								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
 				#endif
 				#ifdef DEVBABY1
-								client.println("LED_2 turned on daily from time X to Y");
+								client.println("Cancel program: LED_2 turned on daily from time X to Y");
 				#endif
 				#ifdef ESPBOX1
-								client.println("Lampa spate pornita zilnic de la 20:30 la 00:00");
+								client.println("CANCELLED: Lampa spate pornita zilnic de la 21:00 la 23:59");
 				#endif
 								client.println("");
 
@@ -1824,6 +1832,9 @@ void loop()
 				menuNumberScheduledDailyXtoY = 0;  // Must be stored in EEPROM - EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y
 				setEeprom_menuNumberScheduledDailyXtoY(menuNumberScheduledDailyXtoY);
 				getEeprom_timerScheduledDailyXtoY();
+				timerScheduledDailyXtoYLoadHasBeenSwitchedOn = FALSE;
+				rel2_status = LOW;
+				digitalWrite(REL_2, rel2_status);
 		}
 
         if (request.indexOf("timers_status") != -1)
@@ -1859,6 +1870,7 @@ void loop()
   //Serial.print("Main loop millis: ");
   //Serial.println(millis());
 
+#ifdef DEVBABY1
   if (cnt<10)
   {
 	  cnt++;
@@ -1872,6 +1884,7 @@ void loop()
   Serial.println("");
   cnt=0;
   }
+#endif
 
   delay(1);
   //Serial.println("Client disonnected");
