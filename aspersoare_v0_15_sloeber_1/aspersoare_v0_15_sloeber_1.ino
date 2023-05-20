@@ -117,7 +117,7 @@ const char* password = "A1b2C3d4";
 #endif
 
 #ifdef ESPBOX1
-const char* ssid = "Gorlitze";
+const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
@@ -694,7 +694,10 @@ void setup()
    //eepromEraseAddr01();
    //eepromEraseRelLastState();
 	//eepromEraseAllDefinedBytes();
-	eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_DAILY_X_TO_Y);
+	//eepromInitParticularByte(EEPROM_ADDR_RST_COUNTER);
+	//eepromInitParticularByte(EEPROM_ADDR_WIFI_CONN_COUNTER);
    wifiDisconnectedLoopCounter = 0;
    wifiDisconnectedCounter = 0;
 
@@ -857,8 +860,17 @@ void setup()
   }
 #endif
 
-#ifdef ESPBOX1
+#ifdef ESPBOX1x
   if (connectedIP != 1090627776) // which means 192.168.1.65
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ESPBOX1
+  if (connectedIP != 1090628032) // which means 192.169.1.65 - for Kaon
   {
     Serial.println("Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
@@ -962,7 +974,7 @@ void setup()
   Serial.println(rel3_status);
 
   //load EEPROM values related to timer scheduled daily from X to Y
-  //loadTimersDataFromEEPROM();
+  loadTimersDataFromEEPROM();
 
   timestampForNextNTPSync = millis();
 
