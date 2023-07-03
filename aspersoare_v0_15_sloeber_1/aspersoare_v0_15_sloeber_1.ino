@@ -85,9 +85,9 @@ unsigned int nrMeniuAutomat = 0;
 
 
 //#define DEVBABY1 // DEVBABY1 board
-//#define ASP     // ASP board
+#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
-#define ESPBOX1	// controller lumini spate
+//#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
 
 //ESP8266WiFiMulti wifiMulti; // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
@@ -96,35 +96,13 @@ unsigned int nrMeniuAutomat = 0;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
 
-#if defined (DEVBABY1x) || defined (ASPx)
-const char* ssid = "Gorlitze";
-const char* password = "A1b2C3d4";
-#endif
 
-#ifdef ASP // we use multiple connection options for ASP
+#if ((defined ASP) || (defined DEVBABY1)) // we use multiple connection options for ASP
 const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
-#ifdef DEVBABY1 // we use multiple connection options for this devboard
-const char* ssid = "Gorlitze_etaj";
-const char* password = "A1b2C3d4";
-#endif
 
-#ifdef DEVBIG
-const char* ssid = "Gorlitze_etaj";
-const char* password = "A1b2C3d4";
-#endif
-
-#ifdef ESPBOX1
-const char* ssid = "Gorlitze_etaj";
-const char* password = "A1b2C3d4";
-#endif
-
-#ifdef ESPBOX2
-const char* ssid = "Gorlitze";
-const char* password = "A1b2C3d4";
-#endif
 
 //int LED1 = 14; //D7 ESP Board
 //int LED2 = 12; //D6 ESP Board
@@ -170,11 +148,6 @@ byte menuNumberProgrammed = 0; // refers to instant timer activation
 byte loadsInProgress[3] = {{FALSE}};
 byte actualLoadInProgress = 0;
 
-//Week Days
-String weekDays[7]={"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
-//Month names
-String months[12]={"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 // Will keep board startup time
 String formattedStartupTime;
@@ -209,30 +182,6 @@ unsigned int wifiDisconnectedLoopCounter = 0;
 unsigned int wifiDisconnectedCounter = 0;
 //unsigned int wifiConnectionAttempts = 0;
 
-byte menuNumber = 0;
-char *menuMessages[] = {"This is string 1", "This is string 2", "This is string 3",
-                     "This is string 4", "This is string 5", "This is string 6"
-                    };
-char *menuLevel1Messages[] = {"1. Seteaza programe",
-                              "2. blabla",
-                              "3. blabla"
-};
-
-char *menuLevel2Messages[] = {"1.1 Aspersoare fata",
-                              "1.2 Aspersoare spate",
-                              "1.3 Irigatii legume"
-};
-char *menuLevel3Messages[] = {"Program nr [1]",
-                              "Program nr [2]",
-                              "Program nr [3]",
-                              "Program nr [4]",
-                              "Program nr [5]"
-};
-
-byte gu8_menuLevel1Position = 0;
-byte gu8_menuLevel2Position = 0;
-byte gu8_menuLevel3Position = 0;
-byte gu8_menuCurrentLevel = 0;
 
 typedef struct
 {
@@ -1612,70 +1561,7 @@ void loop()
            client.println("");
         }
 
-        if (request.indexOf("btn_ok") != -1)
-        {
 
-          switch(gu8_menuCurrentLevel)
-          {
-            case 0:
-              gu8_menuCurrentLevel = 1;
-              client.println(menuLevel1Messages[gu8_menuLevel1Position]);
-              break;
-            case 1:
-              gu8_menuCurrentLevel = 2;
-              client.println(menuLevel2Messages[gu8_menuLevel2Position]);
-              break;
-            case 2:
-              gu8_menuCurrentLevel = 3;
-              client.println(menuLevel3Messages[gu8_menuLevel3Position]);
-              break;
-          }
-
-
-        }
-
-        if (request.indexOf("btn_minus") != -1)
-        {
-          if (gu8_menuCurrentLevel == 1)
-          {
-            if (gu8_menuLevel1Position > 0)
-              {
-                gu8_menuLevel1Position--;
-              }
-            client.println(menuLevel1Messages[gu8_menuLevel1Position]);
-          }
-          if (gu8_menuCurrentLevel == 2)
-          {
-            if (gu8_menuLevel2Position > 0)
-              {
-                gu8_menuLevel2Position--;
-              }
-            client.println(menuLevel2Messages[gu8_menuLevel2Position]);
-          }
-          if (gu8_menuCurrentLevel == 3)
-          {
-            if (gu8_menuLevel3Position > 0)
-              {
-                gu8_menuLevel3Position--;
-              }
-            client.println(menuLevel3Messages[gu8_menuLevel3Position]);
-          }
-        }
-
-        if (request.indexOf("btn_plus") != -1)
-        {
-
-        }
-
-        if (request.indexOf("btn_prev") != -1)
-        {
-
-        }
-
-        if (request.indexOf("btn_next") != -1)
-        {
-
-        }
 
         if (request.indexOf("timeAspects") != -1)
 		{
