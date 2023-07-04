@@ -84,8 +84,8 @@
 unsigned int nrMeniuAutomat = 0;
 
 
-//#define DEVBABY1 // DEVBABY1 board
-#define ASP     // ASP board
+#define DEVBABY1 // DEVBABY1 board
+//#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
 //#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
@@ -1178,6 +1178,9 @@ void loop()
         //client.println("Content-Type: text/html");
         //client.println("");
 
+        client.print("Request is: ");
+        client.println(request);
+
         if (request.indexOf("rel1on") != -1)
         {
                 rel1_status = HIGH;
@@ -1569,7 +1572,7 @@ void loop()
         	client.println(millis());
 		}
 
-        if (request.indexOf("meniu_1") != -1)
+        /*if (request.indexOf("meniu_1") != -1)
         {
         	// O tura aspersor spate 15 min
         	// rel1
@@ -1598,9 +1601,9 @@ void loop()
         	else
         		client.println("A timer is already in progress, stop it first");
 
-        }
+        }*/
 
-        if (request.indexOf("m1_stop") != -1)
+        /*if (request.indexOf("m1_stop") != -1)
 		{
                 	// O tura aspersor spate 15 min
                 	// rel1
@@ -1630,9 +1633,9 @@ void loop()
         	else
         		client.println("This menu is not in progress");
 
-		}
+		}*/
 
-        if (request.indexOf("meniu_25") != -1)
+        /*if (request.indexOf("meniu_25") != -1)
         {
         	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
 
@@ -1651,9 +1654,9 @@ void loop()
 				loadsScheduledOneTime[1] = TRUE;
 				loadsScheduledOneTime[2] = TRUE;
 				menuNumberScheduled = 25;
-        }
+        }*/
 
-        if (request.indexOf("meniu_30") != -1)
+        /*if (request.indexOf("meniu_30") != -1)
         {
         	// O tura REL_2, de la ora X la ora Y
 
@@ -1672,9 +1675,9 @@ void loop()
 				loadsScheduledOneTimeXtoY[1] = TRUE;
 				loadsScheduledOneTimeXtoY[2] = FALSE;
 				menuNumberScheduledXtoY = 30;
-        }
+        }*/
 
-        if (request.indexOf("meniu_40") != -1)
+        /*if (request.indexOf("meniu_40") != -1)
 		{
 			// Zilnic REL_2, de la ora X la ora Y
 
@@ -1701,9 +1704,9 @@ void loop()
 				menuNumberScheduledDailyXtoY = 40;	// Must be stored in EEPROM
 				setEeprom_menuNumberScheduledDailyXtoY(menuNumberScheduledDailyXtoY);
 				getEeprom_timerScheduledDailyXtoY();
-		}
+		}*/
 
-        if (request.indexOf("m40_stop") != -1)
+        /*if (request.indexOf("m40_stop") != -1)
 		{
 			// Dezactiveaza meniu 40
 
@@ -1733,7 +1736,7 @@ void loop()
 				timerScheduledDailyXtoYLoadHasBeenSwitchedOn = FALSE;
 				rel2_status = LOW;
 				digitalWrite(REL_2, rel2_status);
-		}
+		}*/
 
         if (request.indexOf("timers_status") != -1)
         {
@@ -1757,6 +1760,136 @@ void loop()
 
         }
 
+        if (request == "meniu_1")
+		{
+        	client.println("meniu_1 called");
+		}
+
+        if (request == "meniu_2")
+		{
+        	client.println("meniu_2 called");
+		}
+
+        if (request == "meniu_3")
+		{
+        	client.println("meniu_3 called");
+
+        	if ("abcd" == "abcd")
+        		client.println("abcd equal abcd");
+        	else
+        		client.println("abcd not equal abcd");
+
+        	if ("Abcd" == "abcd")
+        		client.println("Abcd equal abcd");
+        	else
+        		client.println("Abcd not equal abcd");
+
+        	if ("abcd_1" == "abcd_1")
+        		client.println("abcd_1 equal abcd_1");
+        	else
+        		client.println("abcd_1 not equal abcd_1");
+
+        	if ("abcd_1" == "abcd_2")
+        		client.println("abcd_1 equal abcd_2");
+        	else
+        		client.println("abcd_1 not equal abcd_2");
+
+        	if ("abcd_1" == "abcd_11")
+        		client.println("abcd_1 equal abcd_11");
+        	else
+        		client.println("abcd_1 not equal abcd_11");
+
+
+        	if ("abcd_11" == "abcd_13")
+        		client.println("abcd_11 equal abcd_13");
+        	else
+        		client.println("abcd_11 not equal abcd_13");
+		}
+
+        if (request == "meniu_4")
+		{
+        	client.println("meniu_4 called");
+		}
+
+        if (request == "meniu_5")
+		{
+        	client.println("meniu_5 called");
+		}
+
+        if (request == "meniu_6")
+		{
+        	client.println("meniu_6 called");
+		}
+
+        if (request == "meniu_7")
+		{
+        	client.println("meniu_7 called");
+		}
+
+        if (request == "meniu_8")
+		{
+        	client.println("meniu_8 called");
+		}
+
+        if (request == "meniu_9")
+		{
+        	client.println("meniu_9 called");
+		}
+
+        if (request == "meniu_10")
+		{
+        	client.println("meniu_10 called");
+		}
+
+        if (request == "meniu_11")
+		{
+        	client.println("meniu_11 called");
+		}
+
+        if (request == "meniu_12")
+		{
+        	client.println("meniu_12 called");
+		}
+
+        if (request == "meniu_20")
+		{
+        	client.println("meniu_20 called");
+		}
+
+        if (request == "meniu_21")
+		{
+        	client.println("meniu_21 called");
+		}
+
+        if (request == "meniu_22")
+		{
+        	client.println("meniu_22 called");
+		}
+
+        if (request == "meniu_30")
+		{
+        	client.println("meniu_30 called");
+		}
+
+        if (request == "meniu_31")
+		{
+        	client.println("meniu_31 called");
+		}
+
+        if (request == "meniu_32")
+		{
+        	client.println("meniu_32 called");
+		}
+
+        if (request == "meniu_30_stop")
+		{
+        	client.println("meniu_30_stop called");
+		}
+
+        if (request == "meniu_20_stop")
+		{
+        	client.println("meniu_20_stop called");
+		}
 
 
 
