@@ -35,8 +35,8 @@
 
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
-#define TIME_INTERVAL_TO_RECHECK_NTP	300000 // 300000ms = 5 min
-//#define TIME_INTERVAL_TO_RECHECK_NTP	900000 // 900000ms = 15 min
+//#define TIME_INTERVAL_TO_RECHECK_NTP	300000 // 300000ms = 5 min
+#define TIME_INTERVAL_TO_RECHECK_NTP	900000 // 900000ms = 15 min
 //#define TIME_INTERVAL_TO_RECHECK_NTP	60000 // 60000ms = 1 min
 #define AVG_MEASURED_MAIN_LOOP_DURATION_MS	502
 
@@ -64,20 +64,29 @@
  * "meniu_18" - O tura aspersor fata, apoi spate, apoi picurator cate 20 min
  * "meniu_19" - O tura aspersor fata, apoi spate, apoi picurator cate 25 min
  * "meniu_20" - O tura aspersor fata, apoi spate, apoi picurator cate 30 min
- * "meniu_21" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 15 min
- * "meniu_22" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 20 min
- * "meniu_23" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 25 min
- * "meniu_24" - O tura programata la 05:00 aspersor fata, apoi spate, apoi picurator cate 30 min
+ * "meniu_21" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 15 min
+ * "meniu_22" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min
+ * "meniu_23" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min
+ * "meniu_24" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min
  * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
+ * "meniu_25_stop" - Anuleaza programarea pt meniu_25
  * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
  * "meniu_30" - O tura programata de la ora X pana la ora Y, o singura data, pt LED_1 (rel_1)
 ****************************************************************/
-#define MENIU_25_LOCALTIME_START	85200
-//#define MENIU_25_LOCALTIME_END		73500 // to be redefined
-#define MENIU_30_LOCALTIME_START	84600
-#define MENIU_30_LOCALTIME_END		84900
-#define MENIU_40_LOCALTIME_START	75600
-#define MENIU_40_LOCALTIME_END		86340
+#define MENIU_21_LOCALTIME_START		18000
+#define MENIU_21_LOCALTIME_DURATION		900
+#define MENIU_22_LOCALTIME_START		18000
+#define MENIU_22_LOCALTIME_DURATION		1200
+#define MENIU_23_LOCALTIME_START		18000
+#define MENIU_23_LOCALTIME_DURATION		1500
+#define MENIU_24_LOCALTIME_START		18000
+#define MENIU_24_LOCALTIME_DURATION		1800
+#define MENIU_25_LOCALTIME_START		80400
+#define MENIU_25_LOCALTIME_DURATION		300
+#define MENIU_30_LOCALTIME_START		84600
+#define MENIU_30_LOCALTIME_END			84900
+#define MENIU_40_LOCALTIME_START		75600
+#define MENIU_40_LOCALTIME_END			86340
 
 //bool meniuAutomatInCurs = 0;
 //bool meniuProgramatInCurs = 0;
@@ -629,8 +638,11 @@ void updateLocalTimersInMainLoop()
 	  }
 	  else
 	  {
-		  // to handle when localTime goes past 86400s
 		  localTimeMs += AVG_MEASURED_MAIN_LOOP_DURATION_MS;
+		  if (localTimeMs > ONE_DAY_IN_MILISECONDS)
+		  {
+			  localTimeMs -= ONE_DAY_IN_MILISECONDS;
+		  }
 		  localTime = localTimeMs / 1000;
 		  boardTimeMs = currentMillis;
 		  boardTime = boardTimeMs / 1000;
@@ -959,18 +971,18 @@ void loop()
 	{	Serial.println("menuNumberScheduled == 25");
 		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
-			if (localTime >= MENIU_25_LOCALTIME_START)
+			if ((localTime >= MENIU_25_LOCALTIME_START) && (localTime < MENIU_25_LOCALTIME_DURATION))
 			{	Serial.println("!!!!! localTime >= MENIU_25_LOCALTIME_START !!!!!!!!");
 				timerScheduledOneTimeStarted = TRUE;
-				timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
+				timestampForNextLoadSwitch = boardTime + MENIU_25_LOCALTIME_DURATION;
 				actualLoadInProgress = 0;
 			}
 		}
 		else	// programmed timer has already started
 		{	Serial.println("IN PROGRESS");
-			if ((localTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
 			{
-				timestampForNextLoadSwitch = localTime + 300;
+				timestampForNextLoadSwitch = boardTime + 300;
 				actualLoadInProgress++;
 
 			}
@@ -1635,7 +1647,7 @@ void loop()
 
 		}*/
 
-        /*if (request.indexOf("meniu_25") != -1)
+        if (request == "meniu_25")
         {
         	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
 
@@ -1654,7 +1666,12 @@ void loop()
 				loadsScheduledOneTime[1] = TRUE;
 				loadsScheduledOneTime[2] = TRUE;
 				menuNumberScheduled = 25;
-        }*/
+        }
+
+        if (request == "meniu_25_stop")
+        {
+        		//TO DO: stopper for menu 25
+        }
 
         /*if (request.indexOf("meniu_30") != -1)
         {
