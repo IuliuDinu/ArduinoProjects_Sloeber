@@ -75,6 +75,18 @@
  * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
  * "meniu_30" - O tura programata de la ora X pana la ora Y, o singura data, pt LED_1 (rel_1)
 ****************************************************************/
+#define MENIU_1_DURATION				900
+#define MENIU_2_DURATION				1200
+#define MENIU_3_DURATION				1500
+#define MENIU_4_DURATION				1800
+#define MENIU_5_DURATION				900
+#define MENIU_6_DURATION				1200
+#define MENIU_7_DURATION				1500
+#define MENIU_8_DURATION				1800
+#define MENIU_9_DURATION				900
+#define MENIU_10_DURATION				1200
+#define MENIU_11_DURATION				1500
+#define MENIU_12_DURATION				1800
 #define MENIU_21_LOCALTIME_START		18000
 #define MENIU_21_LOCALTIME_DURATION		900
 #define MENIU_22_LOCALTIME_START		18000
@@ -139,7 +151,7 @@ byte nbOfWifiConnectionLosses = 0;
 byte rel1_status = LOW;
 byte rel2_status = LOW;
 byte rel3_status = LOW;
-bool timerInProgress = FALSE; // refers to instant timer activation
+bool timerInstantInProgress = FALSE; // refers to instant timer activation
 
 bool timerScheduledOneTime = FALSE;	// refers to 1-time scheduled activation
 bool timerScheduledDaily = FALSE;	// refers to daily scheduled activation
@@ -163,10 +175,10 @@ byte menuNumberScheduledOneTimeOneLoadOnly = 0;	// refers to 1-time scheduled ac
 byte menuNumberScheduledDaily = 0;	// refers to 1-time scheduled activation, time X to Y, only 1 load
 byte menuNumberScheduledDailyOneLoadOnly = 0;	// refers to daily scheduled activation, time X to Y, only 1 load; TO BE SWITCHED TO ARRAY
 
-byte menuNumberProgrammed = 0; // refers to instant timer activation
+byte menuNumberInstantInProgress = 0; // refers to instant timer activation
 
-byte loadsInProgress[3] = {{FALSE}};
-byte actualLoadInProgress = 0;
+bool loadsInProgress[3] = {{FALSE}}; // refers to instant timer activation
+byte actualLoadInProgress = 0;	// refers to any type of program, used to switch to next load
 
 byte menuInProgress = 0; // refers to any menu, when it's actually running
 byte lastMenuSuccessfullyEnded = 0; // gets the value of the last menu
@@ -190,7 +202,7 @@ unsigned long boardTimeMs = 0; // milliseconds
 unsigned long syncTime = 0;
 unsigned long gul_max24hMillis = 0;
 unsigned long wifiConnectedTimeBySystemTime;
-unsigned long programStartTime = 0;
+unsigned long instantProgramStartTime = 0; // refers to instant timer activation
 unsigned long timestampForNextNTPSync = 0;
 unsigned char cnt = 0;
 unsigned long timestampForNextLoadSwitch = 0;
@@ -898,12 +910,12 @@ void setup()
 	//eepromEraseAllDefinedBytes();
 	//eepromInitParticularByte(EEPROM_ADDR_RST_COUNTER);
 	//eepromInitParticularByte(EEPROM_ADDR_WIFI_CONN_COUNTER);
-	eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
-	eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_DAILY);
-	eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS);
-	eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_ONETIME);
-	eepromInitParticularByte(EEPROM_ADDR_MENU_IN_PROGRESS);
-	eepromInitParticularByte(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_DAILY);
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_ONETIME);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_IN_PROGRESS);
+	//eepromInitParticularByte(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
    wifiDisconnectedLoopCounter = 0;
    wifiDisconnectedCounter = 0;
 
@@ -1209,7 +1221,7 @@ void loop()
 
   updateLocalTimersInMainLoop();
 
-  // Handlers for 1-time scheduled program, one or multiple loads (but in order):
+  // Handlers for 1-time scheduled program, one or multiple loads (but in order REL_1, REL_2, REL_3):
   if (timerScheduledOneTime != FALSE)
   {	Serial.println("timerScheduledOneTime != FALSE");
 	if (menuNumberScheduledOneTime == 25)	// Handler for menu Nb 25
@@ -1374,23 +1386,27 @@ void loop()
   } 	// End handlers of for daily scheduled program from X to Y time, only one load programs:
 
 
+
+  // Handlers for instant timer activation:
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 1))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_1_DURATION )
+		  {
+		  	  rel1_status = LOW;
+		  	  digitalWrite(REL_1, rel1_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[0] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_1"
+  // End of handlers for instant timer activation
+
+
   ArduinoOTA.handle(); // OTA usage
 
   WiFiClient client = server.available();
 
-  // Handlers for instant timer activation:
-  if ((menuNumberProgrammed == 1) && (timerInProgress != FALSE))
-  {
-	  if (((currentMillis/1000)-programStartTime) > 900 )
-		  {
-		  	  rel1_status = LOW;
-		  	  digitalWrite(REL_1, rel1_status);
-		  	  timerInProgress = FALSE;
-		  	  loadsInProgress[0] = FALSE;
-		  	  menuNumberProgrammed = 0;
-		  }
-  }
-  // End of handlers for instant timer activation
+
 
   if (!client)
   {
@@ -1829,15 +1845,15 @@ void loop()
         	client.println(millis());
 		}
 
-        /*if (request.indexOf("meniu_1") != -1)
+        if (request == "meniu_1")
         {
         	// O tura aspersor spate 15 min
         	// rel1
-        	if (timerInProgress != TRUE)
+        	if (timerInstantInProgress != TRUE)
 			{
 				rel1_status = HIGH;
 				digitalWrite(REL_1, rel1_status);
-				menuNumberProgrammed = 1;
+				menuNumberInstantInProgress = 1;
 
 				#ifdef ASP
 								client.println("RELAY_1 is ON");
@@ -1849,48 +1865,61 @@ void loop()
 				#endif
 								client.println("");
 
-				programStartTime = millis()/1000;
-				client.print("Local time (s) at program start: ");
-				client.println(programStartTime);
-				timerInProgress = TRUE;
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
 				loadsInProgress[0] = TRUE;
 			}
         	else
         		client.println("A timer is already in progress, stop it first");
 
-        }*/
+        }
 
-        /*if (request.indexOf("m1_stop") != -1)
+        if (request == "meniu_1_stop")
 		{
-                	// O tura aspersor spate 15 min
+                	// Stop program: O tura aspersor spate 15 min
                 	// rel1
-        	if (timerInProgress != FALSE)
+        	if (timerInstantInProgress != FALSE)
         	{
-                	rel1_status = LOW;
-        			digitalWrite(REL_1, rel1_status);
+        		if (menuNumberInstantInProgress == 1)
+        		{
+						rel1_status = LOW;
+						digitalWrite(REL_1, rel1_status);
 
-                	#ifdef ASP
-                	                client.println("RELAY_1 is OFF");
-                	                client.println("Aspersoare SPATE oprite");
-                	#endif
-                	#ifdef DEVBABY1
-                	                client.println("LED_1 is OFF");
-                	#endif
-                	                client.println("");
+						#ifdef ASP
+										client.println("RELAY_1 is OFF");
+										client.println("Aspersoare SPATE oprite");
+						#endif
+						#ifdef DEVBABY1
+										client.println("LED_1 is OFF");
+						#endif
+										client.println("");
 
-					//unsigned long delta = (millis()/1000) - programStartTime;
-					client.print("Was ON for [s]: ");
-					client.println((millis()/1000) - programStartTime);
+						//unsigned long delta = (millis()/1000) - instantProgramStartTime;
+						client.print("Was ON for [s]: ");
+						client.println((millis()/1000) - instantProgramStartTime);
 
-        			timerInProgress = FALSE;
-        			loadsInProgress[0] = FALSE;
-        			menuNumberProgrammed = 0;
+						timerInstantInProgress = FALSE;
+						loadsInProgress[0] = FALSE;
+						menuNumberInstantInProgress = 0;
+        		}
+        		else
+					{
+        				client.println("This program is not in progress.");
+        				client.print("This one is: meniu_");
+        				client.println(menuNumberInstantInProgress);
+        				client.println("");
+					}
 
         	}
         	else
-        		client.println("This menu is not in progress");
+        		client.println("No instant activation programs in progress");
 
-		}*/
+		}
+
+
+
 
         if (request == "meniu_25")
         {
@@ -2000,32 +2029,31 @@ void loop()
 				digitalWrite(REL_2, rel2_status);
 		}*/
 
-        if (request.indexOf("timers_status") != -1)
+        if (request == "timers_status")
         {
-        	if (timerInProgress != FALSE)
+        	if (timerInstantInProgress != FALSE) // Instant timer programs in progress
 			{
-				client.println("Programmed loads:");
-				client.print("LED_1, LED_2, LED_3: ");
+        		client.println("Running program:");
+				client.print("Meniu_");
+				client.println(menuNumberInstantInProgress);
+        		client.println("Running loads:");
+				client.print("REL_1, REL_2, REL_3: ");
 				client.print(loadsInProgress[0]);
 				client.print(loadsInProgress[1]);
 				client.print(loadsInProgress[2]);
 				client.println("");
 
 
-        		unsigned long delta = (millis()/1000) - programStartTime;
+        		unsigned long delta = (millis()/1000) - instantProgramStartTime;
         		client.print("Seconds in progress: ");
 				client.println(delta);
 
         	}
         	else
-        		client.println("No programmed loads at this time.");
+        		client.println("No instant activation programs at this time.");
 
         }
 
-        if (request == "meniu_1")
-		{
-        	client.println("meniu_1 called");
-		}
 
         if (request == "meniu_2")
 		{
