@@ -902,6 +902,14 @@ void updateLocalTimersInMainLoop()
 	  }
 }
 
+void printThisMenuIsNotInProgress_1(WiFiClient client) // rejection reply for wrong stop attempt, applicable for instant programs only
+{
+	client.println("This program is not in progress.");
+	client.print("This one is: meniu_");
+	client.println(menuNumberInstantInProgress);
+	client.println("");
+}
+
 
 void setup()
 {
@@ -1391,6 +1399,30 @@ void loop()
   if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 1))
   {
 	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_1_DURATION )
+	  {
+		  rel1_status = LOW;
+		  digitalWrite(REL_1, rel1_status);
+		  timerInstantInProgress = FALSE;
+		  loadsInProgress[0] = FALSE;
+		  menuNumberInstantInProgress = 0;
+	  }
+  }	// End of handler for "meniu_1"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 2))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_2_DURATION )
+	  {
+		  rel1_status = LOW;
+		  digitalWrite(REL_1, rel1_status);
+		  timerInstantInProgress = FALSE;
+		  loadsInProgress[0] = FALSE;
+		  menuNumberInstantInProgress = 0;
+	  }
+  }	// End of handler for "meniu_2"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 3))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_3_DURATION )
 		  {
 		  	  rel1_status = LOW;
 		  	  digitalWrite(REL_1, rel1_status);
@@ -1398,7 +1430,116 @@ void loop()
 		  	  loadsInProgress[0] = FALSE;
 		  	  menuNumberInstantInProgress = 0;
 		  }
-  }	// End of handler for "meniu_1"
+  }	// End of handler for "meniu_3"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 4))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_4_DURATION )
+		  {
+		  	  rel1_status = LOW;
+		  	  digitalWrite(REL_1, rel1_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[0] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_4"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 5))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_5_DURATION )
+		  {
+		  	  rel3_status = LOW;
+		  	  digitalWrite(REL_3, rel3_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[2] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_5"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 6))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_6_DURATION )
+		  {
+		  	  rel3_status = LOW;
+		  	  digitalWrite(REL_3, rel3_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[2] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_6"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 7))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_7_DURATION )
+		  {
+		  	  rel3_status = LOW;
+		  	  digitalWrite(REL_3, rel3_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[2] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_7"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 8))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_8_DURATION )
+		  {
+		  	  rel3_status = LOW;
+		  	  digitalWrite(REL_3, rel3_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[2] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_8"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 9))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_9_DURATION )
+		  {
+		  	  rel2_status = LOW;
+		  	  digitalWrite(REL_2, rel2_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[1] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_9"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 10))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_10_DURATION )
+		  {
+		  	  rel2_status = LOW;
+		  	  digitalWrite(REL_2, rel2_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[1] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_10"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 11))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_11_DURATION )
+		  {
+		  	  rel2_status = LOW;
+		  	  digitalWrite(REL_2, rel2_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[1] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_11"
+
+  if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 12))
+  {
+	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_12_DURATION )
+		  {
+		  	  rel2_status = LOW;
+		  	  digitalWrite(REL_2, rel2_status);
+		  	  timerInstantInProgress = FALSE;
+		  	  loadsInProgress[1] = FALSE;
+		  	  menuNumberInstantInProgress = 0;
+		  }
+  }	// End of handler for "meniu_12"
+
   // End of handlers for instant timer activation
 
 
@@ -1710,6 +1851,31 @@ void loop()
         	client.println("boardTime - [sec] timp dupa reset");
         	client.println("localtime - experimental");
         	client.println("SystemRestart (buton RESET) - Reset sistem");
+        	client.println("meniu_1 - O tura aspersor spate 15 min, acum");
+        	client.println("meniu_1_stop - Anuleaza meniu_1");
+        	client.println("meniu_2 - O tura aspersor spate 20 min, acum");
+        	client.println("meniu_2_stop - Anuleaza meniu_2");
+        	client.println("meniu_3 - O tura aspersor spate 25 min, acum");
+        	client.println("meniu_3_stop - Anuleaza meniu_3");
+        	client.println("meniu_4 - O tura aspersor spate 30 min, acum");
+        	client.println("meniu_4_stop - Anuleaza meniu_4");
+        	client.println("meniu_5 - O tura aspersor fata 15 min, acum");
+        	client.println("meniu_5_stop - Anuleaza meniu_5");
+        	client.println("meniu_6 - O tura aspersor fata 20 min, acum");
+        	client.println("meniu_6_stop - Anuleaza meniu_6");
+        	client.println("meniu_7 - O tura aspersor fata 25 min, acum");
+        	client.println("meniu_7_stop - Anuleaza meniu_7");
+        	client.println("meniu_8 - O tura aspersor fata 30 min, acum");
+        	client.println("meniu_8_stop - Anuleaza meniu_8");
+        	client.println("meniu_9 - O tura picurator gradina 15 min, acum");
+        	client.println("meniu_9_stop - Anuleaza meniu_9");
+        	client.println("meniu_10 - O tura picurator gradina 20 min, acum");
+        	client.println("meniu_10_stop - Anuleaza meniu_10");
+        	client.println("meniu_11 - O tura picurator gradina 25 min, acum");
+        	client.println("meniu_11_stop - Anuleaza meniu_11");
+        	client.println("meniu_12 - O tura picurator gradina 30 min, acum");
+        	client.println("meniu_12_stop - Anuleaza meniu_12");
+        	client.println("timers_status - Afiseaza status programe active");
 
 #endif
 #ifdef DEVBABY1
@@ -1725,6 +1891,31 @@ void loop()
         	client.println("boardTime - [sec] timp dupa reset");
         	client.println("localtime - experimental");
         	client.println("SystemRestart (buton RESET) - Reset sistem");
+        	client.println("meniu_1 - O tura REL_1 15 min, acum");
+        	client.println("meniu_1_stop - Anuleaza meniu_1");
+        	client.println("meniu_2 - O tura REL_1 20 min, acum");
+        	client.println("meniu_2_stop - Anuleaza meniu_2");
+        	client.println("meniu_3 - O tura REL_1 25 min, acum");
+        	client.println("meniu_3_stop - Anuleaza meniu_3");
+        	client.println("meniu_4 - O tura REL_1 30 min, acum");
+        	client.println("meniu_4_stop - Anuleaza meniu_4");
+        	client.println("meniu_5 - O tura REL_3 15 min, acum");
+        	client.println("meniu_5_stop - Anuleaza meniu_5");
+        	client.println("meniu_6 - O tura REL_3 20 min, acum");
+        	client.println("meniu_6_stop - Anuleaza meniu_6");
+        	client.println("meniu_7 - O tura REL_3 25 min, acum");
+        	client.println("meniu_7_stop - Anuleaza meniu_7");
+        	client.println("meniu_8 - O tura REL_3 30 min, acum");
+        	client.println("meniu_8_stop - Anuleaza meniu_8");
+        	client.println("meniu_9 - O tura REL_2 15 min, acum");
+        	client.println("meniu_9_stop - Anuleaza meniu_9");
+        	client.println("meniu_10 - O tura REL_2 20 min, acum");
+        	client.println("meniu_10_stop - Anuleaza meniu_10");
+        	client.println("meniu_11 - O tura REL_2 25 min, acum");
+        	client.println("meniu_11_stop - Anuleaza meniu_11");
+        	client.println("meniu_12 - O tura REL_2 30 min, acum");
+        	client.println("meniu_12_stop - Anuleaza meniu_12");
+        	client.println("timers_status - Afiseaza status programe active");
 
 #endif
 
@@ -1857,7 +2048,7 @@ void loop()
 
 				#ifdef ASP
 								client.println("RELAY_1 is ON");
-								client.println("Aspersoare SPATE pornite pt 15min");
+								client.println("Aspersoare SPATE pornite pt 15 min");
 				#endif
 				#ifdef DEVBABY1
 								client.println("LED_1 is ON");
@@ -1878,12 +2069,78 @@ void loop()
 
         if (request == "meniu_1_stop")
 		{
-                	// Stop program: O tura aspersor spate 15 min
-                	// rel1
+			// Stop program: O tura aspersor spate 15 min
         	if (timerInstantInProgress != FALSE)
         	{
         		if (menuNumberInstantInProgress == 1)
         		{
+					rel1_status = LOW;
+					digitalWrite(REL_1, rel1_status);
+
+					#ifdef ASP
+									client.println("RELAY_1 is OFF");
+									client.println("Aspersoare SPATE oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_1 is OFF");
+					#endif
+									client.println("");
+
+					//unsigned long delta = (millis()/1000) - instantProgramStartTime;
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[0] = FALSE;
+					menuNumberInstantInProgress = 0;
+        		}
+        		else
+				{
+        			printThisMenuIsNotInProgress_1(client);
+				}
+        	}
+        	else
+        		client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_2")
+		{
+			// O tura aspersor spate 20 min
+			// rel1
+			if (timerInstantInProgress != TRUE)
+			{
+				rel1_status = HIGH;
+				digitalWrite(REL_1, rel1_status);
+				menuNumberInstantInProgress = 2;
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE pornite pt 20 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_1 is ON");
+								client.println("for 20 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[0] = TRUE;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+		}
+
+		if (request == "meniu_2_stop")
+		{
+			// Stop program: O tura aspersor spate 20 min
+			if (timerInstantInProgress != FALSE)
+			{
+				if (menuNumberInstantInProgress == 2)
+				{
 						rel1_status = LOW;
 						digitalWrite(REL_1, rel1_status);
 
@@ -1896,26 +2153,680 @@ void loop()
 						#endif
 										client.println("");
 
-						//unsigned long delta = (millis()/1000) - instantProgramStartTime;
 						client.print("Was ON for [s]: ");
 						client.println((millis()/1000) - instantProgramStartTime);
 
 						timerInstantInProgress = FALSE;
 						loadsInProgress[0] = FALSE;
 						menuNumberInstantInProgress = 0;
+				}
+				else
+				{
+					printThisMenuIsNotInProgress_1(client);
+				}
+			}
+			else
+				client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_3")
+		{
+			// O tura aspersor spate 25 min
+			// rel1
+			if (timerInstantInProgress != TRUE)
+			{
+				rel1_status = HIGH;
+				digitalWrite(REL_1, rel1_status);
+				menuNumberInstantInProgress = 3;
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE pornite pt 25 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_1 is ON");
+								client.println("for 25 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[0] = TRUE;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+		}
+
+		if (request == "meniu_3_stop")
+		{
+			// Stop program: O tura aspersor spate 25 min
+			if (timerInstantInProgress != FALSE)
+			{
+				if (menuNumberInstantInProgress == 3)
+				{
+						rel1_status = LOW;
+						digitalWrite(REL_1, rel1_status);
+
+						#ifdef ASP
+										client.println("RELAY_1 is OFF");
+										client.println("Aspersoare SPATE oprite");
+						#endif
+						#ifdef DEVBABY1
+										client.println("LED_1 is OFF");
+						#endif
+										client.println("");
+
+						client.print("Was ON for [s]: ");
+						client.println((millis()/1000) - instantProgramStartTime);
+
+						timerInstantInProgress = FALSE;
+						loadsInProgress[0] = FALSE;
+						menuNumberInstantInProgress = 0;
+				}
+				else
+				{
+					printThisMenuIsNotInProgress_1(client);
+				}
+			}
+			else
+				client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_4")
+		{
+			// O tura aspersor spate 30 min
+			// rel1
+			if (timerInstantInProgress != TRUE)
+			{
+				rel1_status = HIGH;
+				digitalWrite(REL_1, rel1_status);
+				menuNumberInstantInProgress = 4;
+
+				#ifdef ASP
+								client.println("RELAY_1 is ON");
+								client.println("Aspersoare SPATE pornite pt 30 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_1 is ON");
+								client.println("for 30 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[0] = TRUE;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+		}
+
+		if (request == "meniu_4_stop")
+		{
+			// Stop program: O tura aspersor spate 30 min
+			if (timerInstantInProgress != FALSE)
+			{
+				if (menuNumberInstantInProgress == 4)
+				{
+						rel1_status = LOW;
+						digitalWrite(REL_1, rel1_status);
+
+						#ifdef ASP
+										client.println("RELAY_1 is OFF");
+										client.println("Aspersoare SPATE oprite");
+						#endif
+						#ifdef DEVBABY1
+										client.println("LED_1 is OFF");
+						#endif
+										client.println("");
+
+						client.print("Was ON for [s]: ");
+						client.println((millis()/1000) - instantProgramStartTime);
+
+						timerInstantInProgress = FALSE;
+						loadsInProgress[0] = FALSE;
+						menuNumberInstantInProgress = 0;
+				}
+				else
+				{
+					printThisMenuIsNotInProgress_1(client);
+				}
+			}
+			else
+				client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_5")
+        {
+        	// O tura aspersor fata 15 min
+        	// rel3
+        	if (timerInstantInProgress != TRUE)
+			{
+				rel3_status = HIGH;
+				digitalWrite(REL_3, rel3_status);
+				menuNumberInstantInProgress = 5;
+
+				#ifdef ASP
+								client.println("RELAY_3 is ON");
+								client.println("Aspersoare FATA pornite pt 15 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_3 is ON");
+								client.println("for 15 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[2] = TRUE;
+			}
+        	else
+        		client.println("A timer is already in progress, stop it first");
+
+        }
+
+        if (request == "meniu_5_stop")
+		{
+			// Stop program: O tura aspersor fata 15 min
+        	if (timerInstantInProgress != FALSE)
+        	{
+        		if (menuNumberInstantInProgress == 5)
+        		{
+					rel3_status = LOW;
+					digitalWrite(REL_3, rel3_status);
+
+					#ifdef ASP
+									client.println("RELAY_3 is OFF");
+									client.println("Aspersoare FATA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_3 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[2] = FALSE;
+					menuNumberInstantInProgress = 0;
         		}
         		else
-					{
-        				client.println("This program is not in progress.");
-        				client.print("This one is: meniu_");
-        				client.println(menuNumberInstantInProgress);
-        				client.println("");
-					}
-
+				{
+        			printThisMenuIsNotInProgress_1(client);
+				}
         	}
         	else
         		client.println("No instant activation programs in progress");
+		}
 
+        if (request == "meniu_6")
+        {
+        	// O tura aspersor fata 20 min
+        	// rel3
+        	if (timerInstantInProgress != TRUE)
+			{
+				rel3_status = HIGH;
+				digitalWrite(REL_3, rel3_status);
+				menuNumberInstantInProgress = 6;
+
+				#ifdef ASP
+								client.println("RELAY_3 is ON");
+								client.println("Aspersoare FATA pornite pt 20 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_3 is ON");
+								client.println("for 20 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[2] = TRUE;
+			}
+        	else
+        		client.println("A timer is already in progress, stop it first");
+
+        }
+
+        if (request == "meniu_6_stop")
+		{
+			// Stop program: O tura aspersor fata 20 min
+        	if (timerInstantInProgress != FALSE)
+        	{
+        		if (menuNumberInstantInProgress == 6)
+        		{
+					rel3_status = LOW;
+					digitalWrite(REL_3, rel3_status);
+
+					#ifdef ASP
+									client.println("RELAY_3 is OFF");
+									client.println("Aspersoare FATA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_3 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[2] = FALSE;
+					menuNumberInstantInProgress = 0;
+        		}
+        		else
+				{
+        			printThisMenuIsNotInProgress_1(client);
+				}
+        	}
+        	else
+        		client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_7")
+        {
+        	// O tura aspersor fata 25 min
+        	// rel3
+        	if (timerInstantInProgress != TRUE)
+			{
+				rel3_status = HIGH;
+				digitalWrite(REL_3, rel3_status);
+				menuNumberInstantInProgress = 7;
+
+				#ifdef ASP
+								client.println("RELAY_3 is ON");
+								client.println("Aspersoare FATA pornite pt 25 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_3 is ON");
+								client.println("for 25 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[2] = TRUE;
+			}
+        	else
+        		client.println("A timer is already in progress, stop it first");
+
+        }
+
+        if (request == "meniu_7_stop")
+		{
+			// Stop program: O tura aspersor fata 25 min
+        	if (timerInstantInProgress != FALSE)
+        	{
+        		if (menuNumberInstantInProgress == 7)
+        		{
+					rel3_status = LOW;
+					digitalWrite(REL_3, rel3_status);
+
+					#ifdef ASP
+									client.println("RELAY_3 is OFF");
+									client.println("Aspersoare FATA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_3 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[2] = FALSE;
+					menuNumberInstantInProgress = 0;
+        		}
+        		else
+				{
+        			printThisMenuIsNotInProgress_1(client);
+				}
+        	}
+        	else
+        		client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_8")
+        {
+        	// O tura aspersor fata 30 min
+        	// rel3
+        	if (timerInstantInProgress != TRUE)
+			{
+				rel3_status = HIGH;
+				digitalWrite(REL_3, rel3_status);
+				menuNumberInstantInProgress = 8;
+
+				#ifdef ASP
+								client.println("RELAY_3 is ON");
+								client.println("Aspersoare FATA pornite pt 30 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_3 is ON");
+								client.println("for 30 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[2] = TRUE;
+			}
+        	else
+        		client.println("A timer is already in progress, stop it first");
+
+        }
+
+        if (request == "meniu_8_stop")
+		{
+			// Stop program: O tura aspersor fata 30 min
+        	if (timerInstantInProgress != FALSE)
+        	{
+        		if (menuNumberInstantInProgress == 8)
+        		{
+					rel3_status = LOW;
+					digitalWrite(REL_3, rel3_status);
+
+					#ifdef ASP
+									client.println("RELAY_3 is OFF");
+									client.println("Aspersoare FATA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_3 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[2] = FALSE;
+					menuNumberInstantInProgress = 0;
+        		}
+        		else
+				{
+        			printThisMenuIsNotInProgress_1(client);
+				}
+        	}
+        	else
+        		client.println("No instant activation programs in progress");
+		}
+
+        if (request == "meniu_9")
+         {
+         	// O tura picurator gradina 15 min
+         	// rel3
+         	if (timerInstantInProgress != TRUE)
+ 			{
+ 				rel2_status = HIGH;
+ 				digitalWrite(REL_2, rel2_status);
+ 				menuNumberInstantInProgress = 9;
+
+ 				#ifdef ASP
+ 								client.println("RELAY_2 is ON");
+ 								client.println("Picuratoare GRADINA pornite pt 15 min");
+ 				#endif
+ 				#ifdef DEVBABY1
+ 								client.println("LED_2 is ON");
+ 								client.println("for 15 minutes");
+ 				#endif
+ 								client.println("");
+
+ 				instantProgramStartTime = millis()/1000;
+ 				client.print("Board time (s) at program start: ");
+ 				client.println(instantProgramStartTime);
+ 				timerInstantInProgress = TRUE;
+ 				loadsInProgress[1] = TRUE;
+ 			}
+         	else
+         		client.println("A timer is already in progress, stop it first");
+
+         }
+
+         if (request == "meniu_9_stop")
+ 		{
+ 			// Stop program: O tura picurator gradina 15 min
+         	if (timerInstantInProgress != FALSE)
+         	{
+         		if (menuNumberInstantInProgress == 9)
+         		{
+ 					rel2_status = LOW;
+ 					digitalWrite(REL_2, rel2_status);
+
+ 					#ifdef ASP
+ 									client.println("RELAY_2 is OFF");
+ 									client.println("Picuratoare GRADINA oprite");
+ 					#endif
+ 					#ifdef DEVBABY1
+ 									client.println("LED_2 is OFF");
+ 					#endif
+ 									client.println("");
+
+ 					client.print("Was ON for [s]: ");
+ 					client.println((millis()/1000) - instantProgramStartTime);
+
+ 					timerInstantInProgress = FALSE;
+ 					loadsInProgress[1] = FALSE;
+ 					menuNumberInstantInProgress = 0;
+         		}
+         		else
+ 				{
+         			printThisMenuIsNotInProgress_1(client);
+ 				}
+         	}
+         	else
+         		client.println("No instant activation programs in progress");
+ 		}
+
+         if (request == "meniu_10")
+          {
+          	// O tura picurator gradina 20 min
+          	// rel3
+          	if (timerInstantInProgress != TRUE)
+  			{
+  				rel2_status = HIGH;
+  				digitalWrite(REL_2, rel2_status);
+  				menuNumberInstantInProgress = 10;
+
+  				#ifdef ASP
+  								client.println("RELAY_2 is ON");
+  								client.println("Picuratoare GRADINA pornite pt 20 min");
+  				#endif
+  				#ifdef DEVBABY1
+  								client.println("LED_2 is ON");
+  								client.println("for 20 minutes");
+  				#endif
+  								client.println("");
+
+  				instantProgramStartTime = millis()/1000;
+  				client.print("Board time (s) at program start: ");
+  				client.println(instantProgramStartTime);
+  				timerInstantInProgress = TRUE;
+  				loadsInProgress[1] = TRUE;
+  			}
+          	else
+          		client.println("A timer is already in progress, stop it first");
+
+          }
+
+          if (request == "meniu_10_stop")
+  		{
+  			// Stop program: O tura picurator gradina 20 min
+          	if (timerInstantInProgress != FALSE)
+          	{
+          		if (menuNumberInstantInProgress == 10)
+          		{
+  					rel2_status = LOW;
+  					digitalWrite(REL_2, rel2_status);
+
+  					#ifdef ASP
+  									client.println("RELAY_2 is OFF");
+  									client.println("Picuratoare GRADINA oprite");
+  					#endif
+  					#ifdef DEVBABY1
+  									client.println("LED_2 is OFF");
+  					#endif
+  									client.println("");
+
+  					client.print("Was ON for [s]: ");
+  					client.println((millis()/1000) - instantProgramStartTime);
+
+  					timerInstantInProgress = FALSE;
+  					loadsInProgress[1] = FALSE;
+  					menuNumberInstantInProgress = 0;
+          		}
+          		else
+  				{
+          			printThisMenuIsNotInProgress_1(client);
+  				}
+          	}
+          	else
+          		client.println("No instant activation programs in progress");
+  		}
+
+		  if (request == "meniu_11")
+		   {
+			// O tura picurator gradina 25 min
+			// rel3
+			if (timerInstantInProgress != TRUE)
+			{
+				rel2_status = HIGH;
+				digitalWrite(REL_2, rel2_status);
+				menuNumberInstantInProgress = 11;
+
+				#ifdef ASP
+								client.println("RELAY_2 is ON");
+								client.println("Picuratoare GRADINA pornite pt 25 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_2 is ON");
+								client.println("for 25 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[1] = TRUE;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+		   }
+
+		   if (request == "meniu_11_stop")
+		{
+			// Stop program: O tura picurator gradina 25 min
+			if (timerInstantInProgress != FALSE)
+			{
+				if (menuNumberInstantInProgress == 11)
+				{
+					rel2_status = LOW;
+					digitalWrite(REL_2, rel2_status);
+
+					#ifdef ASP
+									client.println("RELAY_2 is OFF");
+									client.println("Picuratoare GRADINA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_2 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[1] = FALSE;
+					menuNumberInstantInProgress = 0;
+				}
+				else
+				{
+					printThisMenuIsNotInProgress_1(client);
+				}
+			}
+			else
+				client.println("No instant activation programs in progress");
+		}
+
+		if (request == "meniu_12")
+		 {
+			// O tura picurator gradina 30 min
+			// rel3
+			if (timerInstantInProgress != TRUE)
+			{
+				rel2_status = HIGH;
+				digitalWrite(REL_2, rel2_status);
+				menuNumberInstantInProgress = 12;
+
+				#ifdef ASP
+								client.println("RELAY_2 is ON");
+								client.println("Picuratoare GRADINA pornite pt 30 min");
+				#endif
+				#ifdef DEVBABY1
+								client.println("LED_2 is ON");
+								client.println("for 30 minutes");
+				#endif
+								client.println("");
+
+				instantProgramStartTime = millis()/1000;
+				client.print("Board time (s) at program start: ");
+				client.println(instantProgramStartTime);
+				timerInstantInProgress = TRUE;
+				loadsInProgress[1] = TRUE;
+			}
+			else
+				client.println("A timer is already in progress, stop it first");
+
+		 }
+
+		 if (request == "meniu_12_stop")
+		{
+			// Stop program: O tura picurator gradina 3 min
+			if (timerInstantInProgress != FALSE)
+			{
+				if (menuNumberInstantInProgress == 12)
+				{
+					rel2_status = LOW;
+					digitalWrite(REL_2, rel2_status);
+
+					#ifdef ASP
+									client.println("RELAY_2 is OFF");
+									client.println("Picuratoare GRADINA oprite");
+					#endif
+					#ifdef DEVBABY1
+									client.println("LED_2 is OFF");
+					#endif
+									client.println("");
+
+					client.print("Was ON for [s]: ");
+					client.println((millis()/1000) - instantProgramStartTime);
+
+					timerInstantInProgress = FALSE;
+					loadsInProgress[1] = FALSE;
+					menuNumberInstantInProgress = 0;
+				}
+				else
+				{
+					printThisMenuIsNotInProgress_1(client);
+				}
+			}
+			else
+				client.println("No instant activation programs in progress");
 		}
 
 
@@ -2055,91 +2966,9 @@ void loop()
         }
 
 
-        if (request == "meniu_2")
-		{
-        	client.println("meniu_2 called");
-		}
-
-        if (request == "meniu_3")
-		{
-        	client.println("meniu_3 called");
-
-        	if ("abcd" == "abcd")
-        		client.println("abcd equal abcd");
-        	else
-        		client.println("abcd not equal abcd");
-
-        	if ("Abcd" == "abcd")
-        		client.println("Abcd equal abcd");
-        	else
-        		client.println("Abcd not equal abcd");
-
-        	if ("abcd_1" == "abcd_1")
-        		client.println("abcd_1 equal abcd_1");
-        	else
-        		client.println("abcd_1 not equal abcd_1");
-
-        	if ("abcd_1" == "abcd_2")
-        		client.println("abcd_1 equal abcd_2");
-        	else
-        		client.println("abcd_1 not equal abcd_2");
-
-        	if ("abcd_1" == "abcd_11")
-        		client.println("abcd_1 equal abcd_11");
-        	else
-        		client.println("abcd_1 not equal abcd_11");
 
 
-        	if ("abcd_11" == "abcd_13")
-        		client.println("abcd_11 equal abcd_13");
-        	else
-        		client.println("abcd_11 not equal abcd_13");
-		}
 
-        if (request == "meniu_4")
-		{
-        	client.println("meniu_4 called");
-		}
-
-        if (request == "meniu_5")
-		{
-        	client.println("meniu_5 called");
-		}
-
-        if (request == "meniu_6")
-		{
-        	client.println("meniu_6 called");
-		}
-
-        if (request == "meniu_7")
-		{
-        	client.println("meniu_7 called");
-		}
-
-        if (request == "meniu_8")
-		{
-        	client.println("meniu_8 called");
-		}
-
-        if (request == "meniu_9")
-		{
-        	client.println("meniu_9 called");
-		}
-
-        if (request == "meniu_10")
-		{
-        	client.println("meniu_10 called");
-		}
-
-        if (request == "meniu_11")
-		{
-        	client.println("meniu_11 called");
-		}
-
-        if (request == "meniu_12")
-		{
-        	client.println("meniu_12 called");
-		}
 
         if (request == "meniu_20")
 		{
