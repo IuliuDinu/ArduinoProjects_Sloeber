@@ -95,7 +95,7 @@
 #define MENIU_23_LOCALTIME_DURATION		1500
 #define MENIU_24_LOCALTIME_START		18000
 #define MENIU_24_LOCALTIME_DURATION		1800
-#define MENIU_35_LOCALTIME_START		63600
+#define MENIU_35_LOCALTIME_START		300
 #define MENIU_35_DURATION				300
 #define MENIU_30_LOCALTIME_START		84600
 #define MENIU_30_LOCALTIME_END			84900
@@ -875,6 +875,42 @@ byte getEeprom_lastMenuSuccessfullyEnded()
   return val;
 }
 
+void eepromPrintAllVariables(WiFiClient client)
+{
+	client.println("*** Listing all EEPROM values **");
+	client.print("EEPROM value for REL_1: ");
+	client.println(getEepromRel_1());
+	client.print("EEPROM value for REL_2: ");
+	client.println(getEepromRel_2());
+	client.print("EEPROM value for REL_3: ");
+	client.println(getEepromRel_3());
+	client.print("timerScheduledDaily: ");
+	client.println(getEeprom_timerScheduledDaily());
+	client.print("loadsScheduledDaily[0]: ");
+	client.println(getEeprom_loadsScheduledDaily_0());
+	client.print("loadsScheduledDaily[1]: ");
+	client.println(getEeprom_loadsScheduledDaily_1());
+	client.print("loadsScheduledDaily[2]: ");
+	client.println(getEeprom_loadsScheduledDaily_2());
+	client.print("menuNumberScheduledDaily: ");
+	client.println(getEeprom_menuNumberScheduledDaily());
+	client.print("timerScheduledOneTime: ");
+	client.println(getEeprom_timerScheduledOneTime());
+	client.print("loadsScheduledOneTime[0]: ");
+	client.println(getEeprom_loadsScheduledOneTime_0());
+	client.print("loadsScheduledOneTime[1]: ");
+	client.println(getEeprom_loadsScheduledOneTime_1());
+	client.print("loadsScheduledOneTime[2]: ");
+	client.println(getEeprom_loadsScheduledOneTime_2());
+	client.print("menuNumberScheduledOneTime: ");
+	client.println(getEeprom_menuNumberScheduledOneTime());
+	client.print("menuInProgress: ");
+	client.println(getEeprom_menuInProgress());
+	client.print("lastMenuSuccessfullyEnded: ");
+	client.println(getEeprom_lastMenuSuccessfullyEnded());
+	client.println("*** ************** **");
+}
+
 void loadTimersDataFromEEPROM() // load saved timers configuration (of all types) from EEPROM
 {
 	timerScheduledDaily = getEeprom_timerScheduledDaily();
@@ -887,6 +923,8 @@ void loadTimersDataFromEEPROM() // load saved timers configuration (of all types
 	loadsScheduledOneTime[1] = getEeprom_loadsScheduledOneTime_1();
 	loadsScheduledOneTime[2] = getEeprom_loadsScheduledOneTime_2();
 	menuNumberScheduledOneTime = getEeprom_menuNumberScheduledOneTime();
+	menuInProgress = getEeprom_menuInProgress();
+	lastMenuSuccessfullyEnded = getEeprom_lastMenuSuccessfullyEnded();
 }
 
 void updateLocalTimersInMainLoop()
@@ -1269,11 +1307,41 @@ void loop()
 	{	Serial.println("menuNumberScheduledOneTime == 35");
 		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
-			if ((localTime >= MENIU_35_LOCALTIME_START) && (localTime < MENIU_35_LOCALTIME_START + MENIU_35_DURATION)) // To fix here
+			if ((localTime >= MENIU_35_LOCALTIME_START) && (localTime < MENIU_35_LOCALTIME_START + MENIU_35_DURATION) && (menuInProgress == 0)) // To fix here
 			{	Serial.println("!!!!! localTime >= MENIU_35_LOCALTIME_START !!!!!!!!");
 				timerScheduledOneTimeStarted = TRUE;
 				timestampForNextLoadSwitch = boardTime + MENIU_35_DURATION;
 				actualLoadInProgress = 0;
+				menuInProgress = 35;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+			else
+			{
+				if ((menuInProgress == 35) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_35_LOCALTIME_START) && (localTime < (MENIU_35_LOCALTIME_START + (3*MENIU_35_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_35_LOCALTIME_START !!!!!!!!");
+					timerScheduledOneTimeStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_35_DURATION;
+					actualLoadInProgress = 0;
+				}
+				else
+				{
+					if ((menuInProgress == 35) && (lastMenuSuccessfullyEnded == 0))
+					{	// power resumed too late, we cancel this menu
+						menuInProgress = 0;
+						setEeprom_menuInProgress(menuInProgress);
+						lastMenuSuccessfullyEnded = 0;
+						setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+						timerScheduledOneTime = FALSE;
+						menuNumberScheduledOneTime = 0;
+						loadsScheduledOneTime[0] = FALSE;
+						loadsScheduledOneTime[1] = FALSE;
+						loadsScheduledOneTime[2] = FALSE;
+						setEeprom_allParametersForScheduledOneTime();
+					}
+				}
 			}
 		}
 		else	// programmed timer has already started
@@ -1330,6 +1398,10 @@ void loop()
             	loadsScheduledOneTime[1] = FALSE;
             	loadsScheduledOneTime[2] = FALSE;
             	setEeprom_allParametersForScheduledOneTime();
+            	menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 35;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1914,7 +1986,7 @@ void loop()
         	client.println("meniu_12 - O tura picurator gradina 30 min, acum");
         	client.println("meniu_12_stop - Anuleaza meniu_12");
         	client.println("timers_status - Afiseaza status programe active");
-
+        	client.println("print_eeprom - Afiseaza toate valorile din EEPROM");
 #endif
 #ifdef DEVBABY1
         	client.println("Placa devzoltare 'DEVBABY1'");
@@ -1954,7 +2026,7 @@ void loop()
         	client.println("meniu_12 - O tura REL_2 30 min, acum");
         	client.println("meniu_12_stop - Anuleaza meniu_12");
         	client.println("timers_status - Afiseaza status programe active");
-
+        	client.println("print_eeprom - Afiseaza toate valorile din EEPROM");
 #endif
 
 
@@ -3028,8 +3100,10 @@ void loop()
 
         }
 
-
-
+        if (request == "print_eeprom")
+        {
+        	eepromPrintAllVariables(client);
+        }
 
 
 
