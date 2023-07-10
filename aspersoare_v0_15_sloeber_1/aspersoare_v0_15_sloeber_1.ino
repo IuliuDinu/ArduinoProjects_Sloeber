@@ -70,8 +70,8 @@
  * "meniu_22" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min
  * "meniu_23" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min
  * "meniu_24" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min
- * "meniu_25" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
- * "meniu_25_stop" - Anuleaza programarea pt meniu_25
+ * "meniu_35" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
+ * "meniu_35_stop" - Anuleaza programarea pt meniu_35
  * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
  * "meniu_30" - O tura programata de la ora X pana la ora Y, o singura data, pt LED_1 (rel_1)
 ****************************************************************/
@@ -88,15 +88,15 @@
 #define MENIU_11_DURATION				1500
 #define MENIU_12_DURATION				1800
 #define MENIU_21_LOCALTIME_START		18000
-#define MENIU_21_LOCALTIME_DURATION		900
+#define MENIU_21_DURATION				900
 #define MENIU_22_LOCALTIME_START		18000
 #define MENIU_22_LOCALTIME_DURATION		1200
 #define MENIU_23_LOCALTIME_START		18000
 #define MENIU_23_LOCALTIME_DURATION		1500
 #define MENIU_24_LOCALTIME_START		18000
 #define MENIU_24_LOCALTIME_DURATION		1800
-#define MENIU_25_LOCALTIME_START		81000
-#define MENIU_25_LOCALTIME_DURATION		300
+#define MENIU_35_LOCALTIME_START		63600
+#define MENIU_35_DURATION				300
 #define MENIU_30_LOCALTIME_START		84600
 #define MENIU_30_LOCALTIME_END			84900
 #define MENIU_40_LOCALTIME_START		75600
@@ -310,6 +310,16 @@ void updateLocalTime()
   }
   localTime = localTime + (gul_max24hMillis/1000) - syncTime;
   syncTime = gul_max24hMillis/1000;
+}
+
+void resetAllLoads()
+{
+	rel1_status = LOW;
+	rel2_status = LOW;
+	rel3_status = LOW;
+	digitalWrite(REL_1, rel1_status);
+	digitalWrite(REL_2, rel2_status);
+	digitalWrite(REL_3, rel3_status);
 }
 
 
@@ -653,6 +663,15 @@ byte setEeprom_lastMenuSuccessfullyEnded(byte val) // save info in EEPROM: the m
     return status;
 }
 
+void setEeprom_allParametersForScheduledOneTime()
+{
+	setEeprom_timerScheduledOneTime(timerScheduledOneTime);
+	setEeprom_loadsScheduledOneTime_0(loadsScheduledOneTime[0]);
+	setEeprom_loadsScheduledOneTime_1(loadsScheduledOneTime[1]);
+	setEeprom_loadsScheduledOneTime_2(loadsScheduledOneTime[2]);
+	setEeprom_menuNumberScheduledOneTime(menuNumberScheduledOneTime);
+}
+
 
 byte getEepromRel_1()
 {
@@ -863,12 +882,11 @@ void loadTimersDataFromEEPROM() // load saved timers configuration (of all types
 	loadsScheduledDaily[1] = getEeprom_loadsScheduledDaily_1();
 	loadsScheduledDaily[2] = getEeprom_loadsScheduledDaily_2();
 	menuNumberScheduledDaily = getEeprom_menuNumberScheduledDaily();
-	//onetime
-	//timerScheduledOneTime = getEeprom_timerScheduledOneTime();
-	//onetime0
-	//onetime1
-	//onetime2
-	//menuNumberOneTime
+	timerScheduledOneTime = getEeprom_timerScheduledOneTime();
+	loadsScheduledOneTime[0] = getEeprom_loadsScheduledOneTime_0();
+	loadsScheduledOneTime[1] = getEeprom_loadsScheduledOneTime_1();
+	loadsScheduledOneTime[2] = getEeprom_loadsScheduledOneTime_2();
+	menuNumberScheduledOneTime = getEeprom_menuNumberScheduledOneTime();
 }
 
 void updateLocalTimersInMainLoop()
@@ -908,6 +926,19 @@ void printThisMenuIsNotInProgress_1(WiFiClient client) // rejection reply for wr
 	client.print("This one is: meniu_");
 	client.println(menuNumberInstantInProgress);
 	client.println("");
+}
+
+void printThisProgramIsNotScheduled_1(WiFiClient client) // rejection reply for wrong stop attempt, applicable for 1-time programs only
+{
+	client.print("This program is not scheduled. This one is: meniu_");
+	client.println(menuNumberScheduledOneTime);
+}
+
+void printAnother1TimeProgramIsScheduled(WiFiClient client) // rejection reply in case another 1-time program was scheduled
+{
+	client.print("Another 1-time program is scheduled already: meniu_");
+	client.print(menuNumberScheduledOneTime);
+	client.println(". Cancel it first");
 }
 
 
@@ -1230,16 +1261,18 @@ void loop()
   updateLocalTimersInMainLoop();
 
   // Handlers for 1-time scheduled program, one or multiple loads (but in order REL_1, REL_2, REL_3):
+  // **********************************************************************************************
   if (timerScheduledOneTime != FALSE)
   {	Serial.println("timerScheduledOneTime != FALSE");
-	if (menuNumberScheduledOneTime == 25)	// Handler for menu Nb 25
-	{	Serial.println("menuNumberScheduledOneTime == 25");
+
+	if (menuNumberScheduledOneTime == 35)	// Handler for menu Nb 35
+	{	Serial.println("menuNumberScheduledOneTime == 35");
 		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
-			if ((localTime >= MENIU_25_LOCALTIME_START) && (localTime < MENIU_25_LOCALTIME_START + MENIU_25_LOCALTIME_DURATION)) // To fix here
-			{	Serial.println("!!!!! localTime >= MENIU_25_LOCALTIME_START !!!!!!!!");
+			if ((localTime >= MENIU_35_LOCALTIME_START) && (localTime < MENIU_35_LOCALTIME_START + MENIU_35_DURATION)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_35_LOCALTIME_START !!!!!!!!");
 				timerScheduledOneTimeStarted = TRUE;
-				timestampForNextLoadSwitch = boardTime + MENIU_25_LOCALTIME_DURATION;
+				timestampForNextLoadSwitch = boardTime + MENIU_35_DURATION;
 				actualLoadInProgress = 0;
 			}
 		}
@@ -1249,7 +1282,6 @@ void loop()
 			{
 				timestampForNextLoadSwitch = boardTime + 300;
 				actualLoadInProgress++;
-
 			}
 
 			if (actualLoadInProgress == 0)
@@ -1297,19 +1329,25 @@ void loop()
             	loadsScheduledOneTime[0] = FALSE;
             	loadsScheduledOneTime[1] = FALSE;
             	loadsScheduledOneTime[2] = FALSE;
+            	setEeprom_allParametersForScheduledOneTime();
 			}
 
 			digitalWrite(REL_1, rel1_status);
 			digitalWrite(REL_2, rel2_status);
 			digitalWrite(REL_3, rel3_status);
 
+
 		}
-	}		// End of handler for menu Nb 25
+	}		// End of handler for menu Nb 35
+
+
 	//if (menuNumberScheduledOneTime == XX)	// Handler for menu Nb XX
   } 	// End of handlers for 1-time scheduled program
+  	  	 // *******************************************************************************
+
 
   // Handlers for 1-time scheduled program from X to Y time, only one load programs:
-  /*if (timerScheduledOneTimeOneLoadOnly != FALSE)
+/*  if (timerScheduledOneTimeOneLoadOnly != FALSE)
   {	Serial.println("timerScheduledOneTimeOneLoadOnly != FALSE");
 	if (menuNumberScheduledOneLoadOnly == 30)	// Handler for menu Nb 30, only rel_2
 	{	Serial.println("menuNumberScheduledOneLoadOnly == 30");
@@ -1395,7 +1433,7 @@ void loop()
 
 
 
-  // Handlers for instant timer activation:
+  // Handlers for instant timer activation: **************************************************************
   if ((timerInstantInProgress != FALSE) && (menuNumberInstantInProgress == 1))
   {
 	  if (((currentMillis/1000)-instantProgramStartTime) > MENIU_1_DURATION )
@@ -1540,7 +1578,7 @@ void loop()
 		  }
   }	// End of handler for "meniu_12"
 
-  // End of handlers for instant timer activation
+  // End of handlers for instant timer activation ***********************************************************
 
 
   ArduinoOTA.handle(); // OTA usage
@@ -2832,16 +2870,14 @@ void loop()
 
 
 
-        if (request == "meniu_25")
-        {
-        	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
-
+        if (request == "meniu_35")
+        {	// O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
+        	if (timerScheduledOneTime != TRUE)
+        	{
 				#ifdef ASP
-								client.println("RELAY_1 is ON");
 								client.println("Aspersoare SPATE, apoi GRADINA, apoi FATA pornite pt 5min");
 				#endif
 				#ifdef DEVBABY1
-								//client.println("LED_1 is ON");
 								client.println("LED_1, then LED_2, then LED_3 turned on for 5min each, beginning XX:XX");
 				#endif
 								client.println("");
@@ -2850,12 +2886,39 @@ void loop()
 				loadsScheduledOneTime[0] = TRUE;
 				loadsScheduledOneTime[1] = TRUE;
 				loadsScheduledOneTime[2] = TRUE;
-				menuNumberScheduledOneTime = 25;
+				menuNumberScheduledOneTime = 35;
+				setEeprom_allParametersForScheduledOneTime();
+        	}
+        	else
+        	{
+        		printAnother1TimeProgramIsScheduled(client);
+        	}
         }
 
-        if (request == "meniu_25_stop")
-        {
-        		//TO DO: stopper for menu 25
+        if (request == "meniu_35_stop")
+        {	// Anuleaza: O tura REL_1, REL_2, REL_3 cate 5 min fiecare, la ora X
+			if (menuNumberScheduledOneTime == 35)
+			{
+				#ifdef ASP
+					client.println("meniu_35 ANULAT");
+				#endif
+				#ifdef DEVBABY1
+					client.println("meniu_35 ANULAT");
+				#endif
+				client.println("");
+
+				resetAllLoads();
+				timerScheduledOneTime = FALSE;
+				loadsScheduledOneTime[0] = FALSE;
+				loadsScheduledOneTime[1] = FALSE;
+				loadsScheduledOneTime[2] = FALSE;
+				menuNumberScheduledOneTime = 0;
+				setEeprom_allParametersForScheduledOneTime();
+			}
+			else
+			{
+				printThisProgramIsNotScheduled_1(client);
+			}
         }
 
         /*if (request.indexOf("meniu_30") != -1)
