@@ -58,10 +58,10 @@
  * "meniu_10" - O tura picurator gradina 20 min
  * "meniu_11" - O tura picurator gradina 25 min
  * "meniu_12" - O tura picurator gradina 30 min
- * "meniu_13" - O tura aspersor fata, apoi spate, cate 15 min
- * "meniu_14" - O tura aspersor fata, apoi spate, cate 20 min
- * "meniu_15" - O tura aspersor fata, apoi spate, cate 25 min
- * "meniu_16" - O tura aspersor fata, apoi spate, cate 30 min
+ * "meniu_13" - O tura aspersor spate, apoi fata, cate 15 min
+ * "meniu_14" - O tura aspersor spate, apoi fata, cate 20 min
+ * "meniu_15" - O tura aspersor spate, apoi fata, cate 25 min
+ * "meniu_16" - O tura aspersor spate, apoi fata, cate 30 min
  * "meniu_17" - O tura aspersor fata, apoi spate, apoi picurator cate 15 min
  * "meniu_18" - O tura aspersor fata, apoi spate, apoi picurator cate 20 min
  * "meniu_19" - O tura aspersor fata, apoi spate, apoi picurator cate 25 min
@@ -95,7 +95,7 @@
 #define MENIU_23_LOCALTIME_DURATION		1500
 #define MENIU_24_LOCALTIME_START		18000
 #define MENIU_24_LOCALTIME_DURATION		1800
-#define MENIU_35_LOCALTIME_START		300
+#define MENIU_35_LOCALTIME_START		63300
 #define MENIU_35_DURATION				300
 #define MENIU_30_LOCALTIME_START		84600
 #define MENIU_30_LOCALTIME_END			84900
@@ -1041,7 +1041,6 @@ void setup()
 	   digitalWrite(REL_1, LOW);
 	   digitalWrite(REL_2, HIGH);
 	   digitalWrite(REL_3, LOW);
-	   setEepromRel_2(HIGH);
 #endif
         // Initialize a NTPClient to get time
         timeClient.begin();
@@ -1254,6 +1253,7 @@ void setup()
   delay(100);
 
   //load EEPROM REL values
+#if defined (ESPBOX1) || defined (ESPBOX2)
   rel1_status = getEepromRel_1();
   rel2_status = getEepromRel_2();
   rel3_status = getEepromRel_3();
@@ -1267,6 +1267,7 @@ void setup()
   Serial.println(rel2_status);
   Serial.print("rel3_status: ");
   Serial.println(rel3_status);
+#endif
 
   //load EEPROM values related to timers scheduled daily or one-time
   loadTimersDataFromEEPROM();
@@ -1348,7 +1349,7 @@ void loop()
 		{	Serial.println("IN PROGRESS");
 			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
 			{
-				timestampForNextLoadSwitch = boardTime + 300;
+				timestampForNextLoadSwitch = boardTime + MENIU_35_DURATION;
 				actualLoadInProgress++;
 			}
 
@@ -1411,6 +1412,115 @@ void loop()
 
 		}
 	}		// End of handler for menu Nb 35
+
+	if (menuNumberScheduledOneTime == 21)	// Handler for menu Nb 21
+	{	Serial.println("menuNumberScheduledOneTime == 21");
+		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_21_LOCALTIME_START) && (localTime < MENIU_21_LOCALTIME_START + MENIU_21_DURATION) && (menuInProgress == 0)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_21_LOCALTIME_START !!!!!!!!");
+				timerScheduledOneTimeStarted = TRUE;
+				timestampForNextLoadSwitch = boardTime + MENIU_21_DURATION;
+				actualLoadInProgress = 0;
+				menuInProgress = 21;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+			else
+			{
+				if ((menuInProgress == 21) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_21_LOCALTIME_START) && (localTime < (MENIU_21_LOCALTIME_START + (3*MENIU_21_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_21_LOCALTIME_START !!!!!!!!");
+					timerScheduledOneTimeStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_21_DURATION;
+					actualLoadInProgress = 0;
+				}
+				else
+				{
+					if ((menuInProgress == 21) && (lastMenuSuccessfullyEnded == 0))
+					{	// power resumed too late, we cancel this menu
+						menuInProgress = 0;
+						setEeprom_menuInProgress(menuInProgress);
+						lastMenuSuccessfullyEnded = 0;
+						setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+						timerScheduledOneTime = FALSE;
+						menuNumberScheduledOneTime = 0;
+						loadsScheduledOneTime[0] = FALSE;
+						loadsScheduledOneTime[1] = FALSE;
+						loadsScheduledOneTime[2] = FALSE;
+						setEeprom_allParametersForScheduledOneTime();
+					}
+				}
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = boardTime + MENIU_21_DURATION;
+				actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+				if (loadsScheduledOneTime[0] == TRUE)
+				{
+					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+				if (loadsScheduledOneTime[1] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = HIGH;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+				if (loadsScheduledOneTime[2] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = LOW;
+					rel3_status = HIGH;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				timerScheduledOneTime = FALSE;
+				actualLoadInProgress = 0;
+				menuNumberScheduledOneTime = 0;
+				timerScheduledOneTimeStarted = FALSE;
+            	rel1_status = LOW;
+            	rel2_status = LOW;
+            	rel3_status = LOW;
+            	loadsScheduledOneTime[0] = FALSE;
+            	loadsScheduledOneTime[1] = FALSE;
+            	loadsScheduledOneTime[2] = FALSE;
+            	setEeprom_allParametersForScheduledOneTime();
+            	menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 21;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+
+
+		}
+	}		// End of handler for menu Nb 21
 
 
 	//if (menuNumberScheduledOneTime == XX)	// Handler for menu Nb XX
@@ -1708,10 +1818,12 @@ void loop()
         if (request.indexOf("rel1on") != -1)
         {
                 rel1_status = HIGH;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_1(rel1_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_1, rel1_status);
 #ifdef ESPBOX1
                 client.println("RELAY_1 is ON");
@@ -1737,10 +1849,12 @@ void loop()
         if (request.indexOf("rel1off") != -1)
         {
                 rel1_status = LOW;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_1(rel1_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_1, rel1_status);
 #ifdef ESPBOX1
                 client.println("RELAY_1 is OFF");
@@ -1765,10 +1879,12 @@ void loop()
         if (request.indexOf("rel2on") != -1)
         {
                 rel2_status = HIGH;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_2(rel2_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_2, rel2_status);
 #ifdef ESPBOX1
                 client.println("RELAY_2 is ON");
@@ -1793,10 +1909,12 @@ void loop()
         if (request.indexOf("rel2off") != -1)
         {
                 rel2_status = LOW;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_2(rel2_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_2, rel2_status);
 #ifdef ESPBOX1
                 client.println("RELAY_2 is OFF");
@@ -1821,10 +1939,12 @@ void loop()
         if (request.indexOf("rel3on") != -1)
         {
                 rel3_status = HIGH;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_3(rel3_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_3, rel3_status);
 #ifdef ESPBOX1
                 client.println("RELAY_3 is ON");
@@ -1849,10 +1969,12 @@ void loop()
         if (request.indexOf("rel3off") != -1)
         {
                 rel3_status = LOW;
+#if defined (ESPBOX1) || defined (ESPBOX2)
                 if (setEepromRel_3(rel3_status))
                   client.println("EEPROM status saved OK.");
                 else
                   client.println("Failed to save EEPROM status.");
+#endif
                 digitalWrite(REL_3, rel3_status);
 #ifdef ESPBOX1
                 client.println("RELAY_3 is OFF");
