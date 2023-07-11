@@ -1,0 +1,33 @@
+Test cases for power loss
+
+I. In scope for 1-time scheduled menu
+
+I.1. 
+- Menu is scheduled, time is before menu start
+- Cut power
+- Resume power before menu start
+ExpRes: Menu should start normally
+
+I.2. 
+- Menu is scheduled, time is before menu start
+- Cut power
+- Resume power after menu start, but within 1x(duration of a load) time interval
+ExpRes: Menu should start and run normally, but the entire cycle will be a bit delayed, where the maximum delay = duration of a load
+
+I.3. 
+- Menu is scheduled, time is before menu start
+- Cut power
+- Resume power after menu start, but after 1x(duration of a load) time interval
+ExpRes: Menu will not start, and the schedule remains applicable for the next day
+
+I.4.
+- Menu is scheduled and running, time is within t0 to 3x(duration of a load) time interval
+- Cut power
+- Resume power within t0 to 3x(duration of a load) time interval
+ExpRes: No matter what was the progress of the menu when the power was cut, the menu will start again from the beginning and run normally until the end
+
+I.5.
+- Menu is scheduled and running, time is within t0 to 3x(duration of a load) time interval
+- Cut power
+- Resume power after t0 to 3x(duration of a load) time interval
+ExpRes: Menu will be cancelled (including from EEPROM) and lastMenuSuccessfullyEnded will be set to 0.
