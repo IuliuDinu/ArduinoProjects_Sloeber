@@ -46,18 +46,18 @@
 #define FALSE 0
 
 /************* MENU MAP *****************************************
- * "meniu_1" - O tura aspersor spate 15 min
- * "meniu_2" - O tura aspersor spate 20 min
- * "meniu_3" - O tura aspersor spate 25 min
- * "meniu_4" - O tura aspersor spate 30 min
- * "meniu_5" - O tura aspersor fata 15 min
- * "meniu_6" - O tura aspersor fata 20 min
- * "meniu_7" - O tura aspersor fata 25 min
- * "meniu_8" - O tura aspersor fata 30 min
- * "meniu_9" - O tura picurator gradina 15 min
- * "meniu_10" - O tura picurator gradina 20 min
- * "meniu_11" - O tura picurator gradina 25 min
- * "meniu_12" - O tura picurator gradina 30 min
+ * "meniu_1" - O tura aspersor spate 15 min	[DONE]
+ * "meniu_2" - O tura aspersor spate 20 min [DONE]
+ * "meniu_3" - O tura aspersor spate 25 min [DONE]
+ * "meniu_4" - O tura aspersor spate 30 min [DONE]
+ * "meniu_5" - O tura aspersor fata 15 min [DONE]
+ * "meniu_6" - O tura aspersor fata 20 min [DONE]
+ * "meniu_7" - O tura aspersor fata 25 min [DONE]
+ * "meniu_8" - O tura aspersor fata 30 min [DONE]
+ * "meniu_9" - O tura picurator gradina 15 min [DONE]
+ * "meniu_10" - O tura picurator gradina 20 min [DONE]
+ * "meniu_11" - O tura picurator gradina 25 min [DONE]
+ * "meniu_12" - O tura picurator gradina 30 min [DONE]
  * "meniu_13" - O tura aspersor spate, apoi fata, cate 15 min
  * "meniu_14" - O tura aspersor spate, apoi fata, cate 20 min
  * "meniu_15" - O tura aspersor spate, apoi fata, cate 25 min
@@ -66,11 +66,15 @@
  * "meniu_18" - O tura aspersor fata, apoi spate, apoi picurator cate 20 min
  * "meniu_19" - O tura aspersor fata, apoi spate, apoi picurator cate 25 min
  * "meniu_20" - O tura aspersor fata, apoi spate, apoi picurator cate 30 min
- * "meniu_21" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 15 min
- * "meniu_22" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min
- * "meniu_23" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min
- * "meniu_24" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min
+ * "meniu_21" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 15 min [DONE]
+ * "meniu_22" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min [DONE]
+ * "meniu_23" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min [DONE]
+ * "meniu_24" - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min [DONE]
  * "meniu_25" - O tura programata la 05:00 aspersor spate, 30 min
+ * "meniu_30" - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 15 min [DONE]
+ * "meniu_31" - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min [DONE]
+ * "meniu_32" - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min [DONE]
+ * "meniu_33" - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min [DONE]
  * "meniu_35" - O tura programata la XX whatever ora, aspersor spate, apoi picurator, apoi fata cate 5 min
  * "meniu_36" - O tura programata la XX:XX aspersor spate, 5 min
  * "meniu_26" - O tura programata la orele X pana Y, lampa SPATE (rel_2)
@@ -98,12 +102,18 @@
 #define MENIU_24_DURATION				1800
 #define MENIU_25_LOCALTIME_START		18000
 #define MENIU_25_DURATION				1800
+#define MENIU_30_LOCALTIME_START		18000
+#define MENIU_30_DURATION				900
+#define MENIU_31_LOCALTIME_START		18000
+#define MENIU_31_DURATION				1200
+#define MENIU_32_LOCALTIME_START		18000
+#define MENIU_32_DURATION				1500
+#define MENIU_33_LOCALTIME_START		18000
+#define MENIU_33_DURATION				1800
 #define MENIU_35_LOCALTIME_START		69600
 #define MENIU_35_DURATION				300
 #define MENIU_36_LOCALTIME_START		84900
 #define MENIU_36_DURATION				300
-#define MENIU_30_LOCALTIME_START		84600
-#define MENIU_30_LOCALTIME_END			84900
 #define MENIU_40_LOCALTIME_START		75600
 #define MENIU_40_LOCALTIME_END			86340
 
@@ -251,6 +261,25 @@ typedef struct
 
 clock_type gs_localClock = {0};
 clock_and_date_type gs_last_successful_menu_run = {0};
+
+void blinkAllLeds(byte nbOfTimes, byte period)
+{
+	for (int i=0; i<nbOfTimes; i++)
+	{
+		digitalWrite(REL_1, HIGH);
+		delay(period/2);
+		digitalWrite(REL_1, LOW);
+		delay(period/2);
+		digitalWrite(REL_2, HIGH);
+		delay(period/2);
+		digitalWrite(REL_2, LOW);
+		delay(period/2);
+		digitalWrite(REL_3, HIGH);
+		delay(period/2);
+		digitalWrite(REL_3, LOW);
+		delay(period/2);
+	}
+}
 
 void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var)
 {
@@ -677,6 +706,15 @@ void setEeprom_allParametersForScheduledOneTime()
 	setEeprom_menuNumberScheduledOneTime(menuNumberScheduledOneTime);
 }
 
+void setEeprom_allParametersForScheduledDaily()
+{
+	setEeprom_timerScheduledDaily(timerScheduledDaily);
+	setEeprom_loadsScheduledDaily_0(loadsScheduledDaily[0]);
+	setEeprom_loadsScheduledDaily_1(loadsScheduledDaily[1]);
+	setEeprom_loadsScheduledDaily_2(loadsScheduledDaily[2]);
+	setEeprom_menuNumberScheduledDaily(menuNumberScheduledDaily);
+}
+
 
 byte getEepromRel_1()
 {
@@ -977,10 +1015,23 @@ void printThisProgramIsNotScheduled_1(WiFiClient client) // rejection reply for 
 	client.println(menuNumberScheduledOneTime);
 }
 
+void printThisProgramIsNotScheduled_2(WiFiClient client) // rejection reply for wrong stop attempt, applicable for daily programs only
+{
+	client.print("This program is not scheduled. This one is: meniu_");
+	client.println(menuNumberScheduledDaily);
+}
+
 void printAnother1TimeProgramIsScheduled(WiFiClient client) // rejection reply in case another 1-time program was scheduled
 {
 	client.print("Another 1-time program is scheduled already: meniu_");
 	client.print(menuNumberScheduledOneTime);
+	client.println(". Cancel it first");
+}
+
+void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply in case another daily program was scheduled
+{
+	client.print("Another daily program is scheduled already: meniu_");
+	client.print(menuNumberScheduledDaily);
 	client.println(". Cancel it first");
 }
 
@@ -2008,6 +2059,366 @@ void loop()
 	//if (menuNumberScheduledOneLoadOnly == XX)	// Handler for menu Nb XX
   } 	// End handlers of for 1-time scheduled program from X to Y time, only one load programs:
 */
+
+
+
+  // Handlers for daily scheduled program, one or multiple loads (but in order REL_1, REL_2, REL_3):
+  // **********************************************************************************************
+  if (timerScheduledDaily != FALSE)
+  {	Serial.println("timerScheduledDaily != FALSE");
+
+  	  if (menuNumberScheduledDaily == 30)	// Handler for menu Nb 30
+  	  {
+  		Serial.println("menuNumberScheduledOneTime == 30");
+		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_30_LOCALTIME_START) && (localTime < MENIU_30_LOCALTIME_START + MENIU_30_DURATION) && (menuInProgress == 0)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_30_LOCALTIME_START !!!!!!!!");
+				timerScheduledDailyStarted = TRUE;
+				timestampForNextLoadSwitch = boardTime + MENIU_30_DURATION;
+				actualLoadInProgress = 0;
+				menuInProgress = 30;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}	// tested OK!
+			else
+			{
+				if ((menuInProgress == 30) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_30_LOCALTIME_START) && (localTime < (MENIU_30_LOCALTIME_START + (3*MENIU_30_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_30_LOCALTIME_START !!!!!!!!");
+					timerScheduledDailyStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_30_DURATION;
+					actualLoadInProgress = 0;
+				}	// tested OK!
+
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = boardTime + MENIU_30_DURATION;
+				actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+				if (loadsScheduledDaily[0] == TRUE)
+				{
+					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+				if (loadsScheduledDaily[1] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = HIGH;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+				if (loadsScheduledDaily[2] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = LOW;
+					rel3_status = HIGH;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				actualLoadInProgress = 0;
+				timerScheduledDailyStarted = FALSE;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				rel3_status = LOW;
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 30;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+		}
+	}		// End of handler for menu Nb 30
+
+  	  if (menuNumberScheduledDaily == 31)	// Handler for menu Nb 31
+  	  {
+  		Serial.println("menuNumberScheduledOneTime == 31");
+		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_31_LOCALTIME_START) && (localTime < MENIU_31_LOCALTIME_START + MENIU_31_DURATION) && (menuInProgress == 0)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_31_LOCALTIME_START !!!!!!!!");
+				timerScheduledDailyStarted = TRUE;
+				timestampForNextLoadSwitch = boardTime + MENIU_31_DURATION;
+				actualLoadInProgress = 0;
+				menuInProgress = 31;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}	// tested OK!
+			else
+			{
+				if ((menuInProgress == 31) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_31_LOCALTIME_START) && (localTime < (MENIU_31_LOCALTIME_START + (3*MENIU_31_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_31_LOCALTIME_START !!!!!!!!");
+					timerScheduledDailyStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_31_DURATION;
+					actualLoadInProgress = 0;
+				}	// tested OK!
+
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = boardTime + MENIU_31_DURATION;
+				actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+				if (loadsScheduledDaily[0] == TRUE)
+				{
+					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+				if (loadsScheduledDaily[1] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = HIGH;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+				if (loadsScheduledDaily[2] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = LOW;
+					rel3_status = HIGH;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				actualLoadInProgress = 0;
+				timerScheduledDailyStarted = FALSE;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				rel3_status = LOW;
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 31;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+		}
+	}		// End of handler for menu Nb 31
+
+  	  if (menuNumberScheduledDaily == 32)	// Handler for menu Nb 32
+  	  {
+  		Serial.println("menuNumberScheduledOneTime == 32");
+		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_32_LOCALTIME_START) && (localTime < MENIU_32_LOCALTIME_START + MENIU_32_DURATION) && (menuInProgress == 0)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_32_LOCALTIME_START !!!!!!!!");
+				timerScheduledDailyStarted = TRUE;
+				timestampForNextLoadSwitch = boardTime + MENIU_32_DURATION;
+				actualLoadInProgress = 0;
+				menuInProgress = 32;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}	// tested OK!
+			else
+			{
+				if ((menuInProgress == 32) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_32_LOCALTIME_START) && (localTime < (MENIU_32_LOCALTIME_START + (3*MENIU_32_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_32_LOCALTIME_START !!!!!!!!");
+					timerScheduledDailyStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_32_DURATION;
+					actualLoadInProgress = 0;
+				}	// tested OK!
+
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = boardTime + MENIU_32_DURATION;
+				actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+				if (loadsScheduledDaily[0] == TRUE)
+				{
+					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+				if (loadsScheduledDaily[1] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = HIGH;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+				if (loadsScheduledDaily[2] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = LOW;
+					rel3_status = HIGH;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				actualLoadInProgress = 0;
+				timerScheduledDailyStarted = FALSE;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				rel3_status = LOW;
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 32;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+		}
+	}		// End of handler for menu Nb 32
+
+  	  if (menuNumberScheduledDaily == 33)	// Handler for menu Nb 33
+  	  {
+  		Serial.println("menuNumberScheduledOneTime == 33");
+		if (timerScheduledDailyStarted == FALSE)	// scheduled timer not yet started
+		{
+			if ((localTime >= MENIU_33_LOCALTIME_START) && (localTime < MENIU_33_LOCALTIME_START + MENIU_30_DURATION) && (menuInProgress == 0)) // To fix here
+			{	Serial.println("!!!!! localTime >= MENIU_33_LOCALTIME_START !!!!!!!!");
+				timerScheduledDailyStarted = TRUE;
+				timestampForNextLoadSwitch = boardTime + MENIU_33_DURATION;
+				actualLoadInProgress = 0;
+				menuInProgress = 33;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 0;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}	// tested OK!
+			else
+			{
+				if ((menuInProgress == 33) && (lastMenuSuccessfullyEnded == 0) && (localTime >= MENIU_33_LOCALTIME_START) && (localTime < (MENIU_33_LOCALTIME_START + (3*MENIU_33_DURATION))))
+				{	// power resumed within a maximum time inverval of 3*(menu duration per load)
+					Serial.println("!!!!! POWER RESUMED, localTime >= MENIU_33_LOCALTIME_START !!!!!!!!");
+					timerScheduledDailyStarted = TRUE;
+					timestampForNextLoadSwitch = boardTime + MENIU_33_DURATION;
+					actualLoadInProgress = 0;
+				}	// tested OK!
+
+			}
+		}
+		else	// programmed timer has already started
+		{	Serial.println("IN PROGRESS");
+			if ((boardTime > timestampForNextLoadSwitch) && (actualLoadInProgress <3))
+			{
+				timestampForNextLoadSwitch = boardTime + MENIU_33_DURATION;
+				actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 0)
+			{
+				if (loadsScheduledDaily[0] == TRUE)
+				{
+					rel1_status = HIGH;
+					rel2_status = LOW;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 1)
+			{
+				if (loadsScheduledDaily[1] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = HIGH;
+					rel3_status = LOW;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 2)
+			{
+				if (loadsScheduledDaily[2] == TRUE)
+				{
+					rel1_status = LOW;
+					rel2_status = LOW;
+					rel3_status = HIGH;
+				}
+				else actualLoadInProgress++;
+			}
+
+			if (actualLoadInProgress == 3)
+			{
+				actualLoadInProgress = 0;
+				timerScheduledDailyStarted = FALSE;
+				rel1_status = LOW;
+				rel2_status = LOW;
+				rel3_status = LOW;
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+				lastMenuSuccessfullyEnded = 33;
+				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+			}
+
+			digitalWrite(REL_1, rel1_status);
+			digitalWrite(REL_2, rel2_status);
+			digitalWrite(REL_3, rel3_status);
+		}
+	}		// End of handler for menu Nb 33
+
+  }	// End of handlers for daily scheduled programs
+ 	 // *******************************************************************************************
+
+  // TBD - will potentially be abandoned since this can be also covered by daily multiple loads handler
   // Handlers for daily scheduled program from X to Y time, only one load programs:
   if (timerScheduledDailyOneLoadOnly != FALSE)
   {	//Serial.println("timerScheduledDailyOneLoadOnly != FALSE");
@@ -2556,6 +2967,14 @@ void loop()
         	client.println("meniu_23_stop - Anuleaza meniu_23");
         	client.println("meniu_24 - O tura programata la 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min");
         	client.println("meniu_24_stop - Anuleaza meniu_24");
+        	client.println("meniu_30 - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 15 min");
+			client.println("meniu_30_stop - Anuleaza meniu_30");
+        	client.println("meniu_31 - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 20 min");
+			client.println("meniu_31_stop - Anuleaza meniu_31");
+        	client.println("meniu_32 - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 25 min");
+			client.println("meniu_32_stop - Anuleaza meniu_32");
+        	client.println("meniu_33 - Program zilnic de la ora 05:00 aspersor spate, apoi picurator, apoi aspersor fata, cate 30 min");
+			client.println("meniu_33_stop - Anuleaza meniu_33");
         	client.println("timers_status - Afiseaza status programe active");
         	client.println("print_eeprom - Afiseaza toate valorile din EEPROM");
 #endif
@@ -2604,6 +3023,14 @@ void loop()
         	client.println("meniu_23_stop - Anuleaza meniu_23");
         	client.println("meniu_24 - O tura programata la 05:00 REL_1, apoi REL_2, apoi REL_3, cate 30 min");
         	client.println("meniu_24_stop - Anuleaza meniu_24");
+        	client.println("meniu_30 - Program zilnic de la ora 05:00 REL_1, apoi REL_2, apoi REL_3, cate 15 min");
+			client.println("meniu_30_stop - Anuleaza meniu_30");
+        	client.println("meniu_31 - Program zilnic de la ora 05:00 REL_1, apoi REL_2, apoi REL_3, cate 20 min");
+			client.println("meniu_31_stop - Anuleaza meniu_31");
+        	client.println("meniu_32 - Program zilnic de la ora 05:00 REL_1, apoi REL_2, apoi REL_3, cate 25 min");
+			client.println("meniu_32_stop - Anuleaza meniu_32");
+        	client.println("meniu_33 - Program zilnic de la ora 05:00 REL_1, apoi REL_2, apoi REL_3, cate 30 min");
+			client.println("meniu_33_stop - Anuleaza meniu_33");
         	client.println("timers_status - Afiseaza status programe active");
         	client.println("print_eeprom - Afiseaza toate valorile din EEPROM");
 #endif
@@ -3859,6 +4286,230 @@ void loop()
 		}
 
 
+		if (request == "meniu_30")
+		{	// Zilnic REL_1, REL_2, REL_3 cate 15 min fiecare, la ora 5
+			if (timerScheduledDaily != TRUE)
+			{
+				#ifdef ASP
+								client.println("ZILNIC Aspersoare SPATE, apoi GRADINA, apoi FATA pornite fiecare cate 15 min incepand cu ora 05:00");
+				#endif
+				#ifdef DEVBABY1
+								client.println("DAILY LED_1, then LED_2, then LED_3 turned on for 15 min each, beginning 05:00");
+				#endif
+								client.println("");
+
+				timerScheduledDaily = TRUE;
+				loadsScheduledDaily[0] = TRUE;
+				loadsScheduledDaily[1] = TRUE;
+				loadsScheduledDaily[2] = TRUE;
+				menuNumberScheduledDaily = 30;
+				setEeprom_allParametersForScheduledDaily();
+			}
+			else
+			{
+				printAnotherDailyProgramIsScheduled(client);
+			}
+		}
+
+		if (request == "meniu_30_stop")
+		{	// Anuleaza: // Zilnic REL_1, REL_2, REL_3 cate 15 min fiecare, la ora 5
+			if (menuNumberScheduledDaily == 30)
+			{
+				#ifdef ASP
+					client.println("meniu_30 ANULAT");
+				#endif
+				#ifdef DEVBABY1
+					client.println("meniu_30 ANULAT");
+				#endif
+				client.println("");
+
+				if (menuInProgress == 30)
+				{
+					resetAllLoads();
+				}
+				timerScheduledDaily = FALSE;
+				loadsScheduledDaily[0] = FALSE;
+				loadsScheduledDaily[1] = FALSE;
+				loadsScheduledDaily[2] = FALSE;
+				menuNumberScheduledDaily = 0;
+				setEeprom_allParametersForScheduledDaily();
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+			}
+			else
+			{
+				printThisProgramIsNotScheduled_2(client);
+			}
+		}
+
+		if (request == "meniu_31")
+		{	// Zilnic REL_1, REL_2, REL_3 cate 30 min fiecare, la ora 5
+			if (timerScheduledDaily != TRUE)
+			{
+				#ifdef ASP
+								client.println("ZILNIC Aspersoare SPATE, apoi GRADINA, apoi FATA pornite fiecare cate 20 min incepand cu ora 05:00");
+				#endif
+				#ifdef DEVBABY1
+								client.println("DAILY LED_1, then LED_2, then LED_3 turned on for 20 min each, beginning 05:00");
+				#endif
+								client.println("");
+
+				timerScheduledDaily = TRUE;
+				loadsScheduledDaily[0] = TRUE;
+				loadsScheduledDaily[1] = TRUE;
+				loadsScheduledDaily[2] = TRUE;
+				menuNumberScheduledDaily = 31;
+				setEeprom_allParametersForScheduledDaily();
+			}
+			else
+			{
+				printAnotherDailyProgramIsScheduled(client);
+			}
+		}
+
+		if (request == "meniu_31_stop")
+		{	// Anuleaza: // Zilnic REL_1, REL_2, REL_3 cate 20 min fiecare, la ora 5
+			if (menuNumberScheduledDaily == 31)
+			{
+				#ifdef ASP
+					client.println("meniu_31 ANULAT");
+				#endif
+				#ifdef DEVBABY1
+					client.println("meniu_31 ANULAT");
+				#endif
+				client.println("");
+
+				if (menuInProgress == 31)
+				{
+					resetAllLoads();
+				}
+				timerScheduledDaily = FALSE;
+				loadsScheduledDaily[0] = FALSE;
+				loadsScheduledDaily[1] = FALSE;
+				loadsScheduledDaily[2] = FALSE;
+				menuNumberScheduledDaily = 0;
+				setEeprom_allParametersForScheduledDaily();
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+			}
+			else
+			{
+				printThisProgramIsNotScheduled_2(client);
+			}
+		}
+
+		if (request == "meniu_32")
+		{	// Zilnic REL_1, REL_2, REL_3 cate 25 min fiecare, la ora 5
+			if (timerScheduledDaily != TRUE)
+			{
+				#ifdef ASP
+								client.println("ZILNIC Aspersoare SPATE, apoi GRADINA, apoi FATA pornite fiecare cate 25 min incepand cu ora 05:00");
+				#endif
+				#ifdef DEVBABY1
+								client.println("DAILY LED_1, then LED_2, then LED_3 turned on for 25 min each, beginning 05:00");
+				#endif
+								client.println("");
+
+				timerScheduledDaily = TRUE;
+				loadsScheduledDaily[0] = TRUE;
+				loadsScheduledDaily[1] = TRUE;
+				loadsScheduledDaily[2] = TRUE;
+				menuNumberScheduledDaily = 32;
+				setEeprom_allParametersForScheduledDaily();
+			}
+			else
+			{
+				printAnotherDailyProgramIsScheduled(client);
+			}
+		}
+
+		if (request == "meniu_32_stop")
+		{	// Anuleaza: // Zilnic REL_1, REL_2, REL_3 cate 25 min fiecare, la ora 5
+			if (menuNumberScheduledDaily == 32)
+			{
+				#ifdef ASP
+					client.println("meniu_32 ANULAT");
+				#endif
+				#ifdef DEVBABY1
+					client.println("meniu_32 ANULAT");
+				#endif
+				client.println("");
+
+				if (menuInProgress == 32)
+				{
+					resetAllLoads();
+				}
+				timerScheduledDaily = FALSE;
+				loadsScheduledDaily[0] = FALSE;
+				loadsScheduledDaily[1] = FALSE;
+				loadsScheduledDaily[2] = FALSE;
+				menuNumberScheduledDaily = 0;
+				setEeprom_allParametersForScheduledDaily();
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+			}
+			else
+			{
+				printThisProgramIsNotScheduled_2(client);
+			}
+		}
+
+		if (request == "meniu_33")
+		{	// Zilnic REL_1, REL_2, REL_3 cate 30 min fiecare, la ora 5
+			if (timerScheduledDaily != TRUE)
+			{
+				#ifdef ASP
+								client.println("ZILNIC Aspersoare SPATE, apoi GRADINA, apoi FATA pornite fiecare cate 30 min incepand cu ora 05:00");
+				#endif
+				#ifdef DEVBABY1
+								client.println("DAILY LED_1, then LED_2, then LED_3 turned on for 30 min each, beginning 05:00");
+				#endif
+								client.println("");
+
+				timerScheduledDaily = TRUE;
+				loadsScheduledDaily[0] = TRUE;
+				loadsScheduledDaily[1] = TRUE;
+				loadsScheduledDaily[2] = TRUE;
+				menuNumberScheduledDaily = 33;
+				setEeprom_allParametersForScheduledDaily();
+			}
+			else
+			{
+				printAnotherDailyProgramIsScheduled(client);
+			}
+		}
+
+		if (request == "meniu_33_stop")
+		{	// Anuleaza: // Zilnic REL_1, REL_2, REL_3 cate 30 min fiecare, la ora 5
+			if (menuNumberScheduledDaily == 33)
+			{
+				#ifdef ASP
+					client.println("meniu_33 ANULAT");
+				#endif
+				#ifdef DEVBABY1
+					client.println("meniu_33 ANULAT");
+				#endif
+				client.println("");
+
+				if (menuInProgress == 33)
+				{
+					resetAllLoads();
+				}
+				timerScheduledDaily = FALSE;
+				loadsScheduledDaily[0] = FALSE;
+				loadsScheduledDaily[1] = FALSE;
+				loadsScheduledDaily[2] = FALSE;
+				menuNumberScheduledDaily = 0;
+				setEeprom_allParametersForScheduledDaily();
+				menuInProgress = 0;
+				setEeprom_menuInProgress(menuInProgress);
+			}
+			else
+			{
+				printThisProgramIsNotScheduled_2(client);
+			}
+		}
+
         /*if (request.indexOf("meniu_30") != -1)
         {
         	// O tura REL_2, de la ora X la ora Y
@@ -3964,47 +4615,37 @@ void loop()
         	else
         		client.println("No instant activation programs at this time.");
 
+        	if (menuInProgress != 0)
+        	{
+        		client.print("A 1-Time or Daily program is in progress: meniu_ ");
+				client.println(menuInProgress);
+				client.println("Running loads:");
+				client.print("REL_1, REL_2, REL_3: ");
+				client.print(rel1_status);
+				client.print(rel2_status);
+				client.print(rel3_status);
+        	}
+        	else
+				client.println("No 1-Time or Daily programs in progress right now.");
+
+        	if (menuNumberScheduledOneTime != 0)
+        	{
+        		client.print("A 1-Time program is scheduled to run: meniu_");
+        		client.println(menuNumberScheduledOneTime);
+        	}
+
+        	if (menuNumberScheduledDaily != 0)
+        	{
+        		client.print("A Daily program is scheduled to run: meniu_");
+        		client.println(menuNumberScheduledDaily);
+        	}
+
         }
 
         if (request == "print_eeprom")
         {
         	eepromPrintAllVariables(client);
         }
-
-
-
-        if (request == "meniu_20")
-		{
-        	client.println("meniu_20 called");
-		}
-
-
-
-        if (request == "meniu_30")
-		{
-        	client.println("meniu_30 called");
-		}
-
-        if (request == "meniu_31")
-		{
-        	client.println("meniu_31 called");
-		}
-
-        if (request == "meniu_32")
-		{
-        	client.println("meniu_32 called");
-		}
-
-        if (request == "meniu_30_stop")
-		{
-        	client.println("meniu_30_stop called");
-		}
-
-        if (request == "meniu_20_stop")
-		{
-        	client.println("meniu_20_stop called");
-		}
-
 
 
 
