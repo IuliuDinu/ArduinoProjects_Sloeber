@@ -346,6 +346,28 @@ void updateLocalTime()
   syncTime = gul_max24hMillis/1000;
 }
 
+void getDateFromNTP(String &date)
+{
+    time_t epochTime = timeClient.getEpochTime();
+    struct tm *ptm = gmtime ((time_t *)&epochTime);
+    int monthDay = ptm->tm_mday;
+    int currentMonth = ptm->tm_mon+1;
+    int currentYear = ptm->tm_year+1900;
+    date = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
+}
+
+void getDateFromNTPToStruct(clock_and_date_type &timestruct)
+{
+    time_t epochTime = timeClient.getEpochTime();
+    struct tm *ptm = gmtime ((time_t *)&epochTime);
+    int monthDay = ptm->tm_mday;
+    int currentMonth = ptm->tm_mon+1;
+    int currentYear = ptm->tm_year+1900;
+    timestruct.d = monthDay;
+    timestruct.mo = currentMonth;
+    timestruct.y = currentYear;
+}
+
 void resetAllLoads()
 {
 	rel1_status = LOW;
@@ -1119,12 +1141,7 @@ void setup()
           Serial.println(formattedStartupTime);
         }
 
-        time_t epochTime = timeClient.getEpochTime();
-        struct tm *ptm = gmtime ((time_t *)&epochTime);
-        int monthDay = ptm->tm_mday;
-        int currentMonth = ptm->tm_mon+1;
-        int currentYear = ptm->tm_year+1900;
-        startupDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
+        getDateFromNTP(startupDate);
 
 
       wifiConnectedTimeBySystemTime = millis()/1000;
@@ -4647,11 +4664,30 @@ void loop()
         	eepromPrintAllVariables(client);
         }
 
+        if (request == "get_date")
+        {
+        	String currentDate;
+        	getDateFromNTP(currentDate);
+        	client.print("Current date: ");
+        	client.println(currentDate);
+        }
+
+        if (request == "get_date2")
+        {
+        	getDateFromNTPToStruct(gs_last_successful_menu_run);
+        	client.println("Current date: ");
+        	client.print("Y: ");
+        	client.println(gs_last_successful_menu_run.y);
+        	client.print("M: ");
+        	client.println(gs_last_successful_menu_run.mo);
+        	client.print("D: ");
+        	client.println(gs_last_successful_menu_run.d);
+        }
+
 
 
          new_client = 0;
       }
-
 
   //Serial.print("Main loop millis: ");
   //Serial.println(millis());
