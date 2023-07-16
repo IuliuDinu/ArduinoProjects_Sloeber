@@ -113,7 +113,7 @@
 #define MENIU_33_DURATION				1800
 #define MENIU_35_LOCALTIME_START		69600
 #define MENIU_35_DURATION				300
-#define MENIU_36_LOCALTIME_START		84900
+#define MENIU_36_LOCALTIME_START		58800
 #define MENIU_36_DURATION				300
 #define MENIU_40_LOCALTIME_START		75600
 #define MENIU_40_LOCALTIME_END			86340
@@ -713,7 +713,7 @@ byte setEeprom_lastMenuSuccessfullyEnded(byte val) // save info in EEPROM: the m
     byte status = 0;
     EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
     delay(100);
-    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED, byte(val));
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED, val);
     delay(100);
     status = EEPROM.commit();
     delay(100);
@@ -725,7 +725,7 @@ byte setEeprom_lastMenuSuccessfullyEnded_Day(byte val) // save info in EEPROM: t
     byte status = 0;
     EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
     delay(100);
-    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY, val);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY, byte(val));
     delay(100);
     status = EEPROM.commit();
     delay(100);
@@ -997,6 +997,8 @@ void eepromPrintAllVariables(WiFiClient client)
 	client.println(getEeprom_menuInProgress());
 	client.print("lastMenuSuccessfullyEnded: ");
 	client.println(getEeprom_lastMenuSuccessfullyEnded());
+	client.print("lastMenuSuccessfullyEnded_Day: ");
+	client.println(getEeprom_lastMenuSuccessfullyEnded_Day());
 	client.println("*** ************** **");
 }
 
@@ -1609,6 +1611,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 36;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
