@@ -17,23 +17,24 @@
  *  6 - REL_3 last state
  *  7 - REL_3 last state (redundancy)
  ***********************************/
-#define EEPROM_ADDR_MAX								4095
-#define EEPROM_ADDR_RST_COUNTER                		0
-#define EEPROM_ADDR_WIFI_CONN_COUNTER          		1
-#define EEPROM_ADDR_REL_1_LAST_STATE           		2
-#define EEPROM_ADDR_REL_1_LAST_STATE_INV       		3
-#define EEPROM_ADDR_REL_2_LAST_STATE           		4
-#define EEPROM_ADDR_REL_2_LAST_STATE_INV       		5
-#define EEPROM_ADDR_REL_3_LAST_STATE           		6
-#define EEPROM_ADDR_REL_3_LAST_STATE_INV       		7
-#define EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS	   		8
-#define EEPROM_ADDR_MENU_NB_SCH_DAILY				9
-#define EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS		10
-#define EEPROM_ADDR_MENU_NB_SCH_ONETIME				11
-#define EEPROM_ADDR_MENU_IN_PROGRESS		   		12
-#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED	13
+#define EEPROM_ADDR_MAX									4095
+#define EEPROM_ADDR_RST_COUNTER                			0
+#define EEPROM_ADDR_WIFI_CONN_COUNTER          			1
+#define EEPROM_ADDR_REL_1_LAST_STATE           			2
+#define EEPROM_ADDR_REL_1_LAST_STATE_INV       			3
+#define EEPROM_ADDR_REL_2_LAST_STATE           			4
+#define EEPROM_ADDR_REL_2_LAST_STATE_INV       			5
+#define EEPROM_ADDR_REL_3_LAST_STATE           			6
+#define EEPROM_ADDR_REL_3_LAST_STATE_INV       			7
+#define EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS	   			8
+#define EEPROM_ADDR_MENU_NB_SCH_DAILY					9
+#define EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS			10
+#define EEPROM_ADDR_MENU_NB_SCH_ONETIME					11
+#define EEPROM_ADDR_MENU_IN_PROGRESS		   			12
+#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED		13
+#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY	14
 
- #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       14 //to become 14 after handlers are implemented!!!!!
+ #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       15 //to become 14 after handlers are implemented!!!!!
 
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
@@ -712,7 +713,19 @@ byte setEeprom_lastMenuSuccessfullyEnded(byte val) // save info in EEPROM: the m
     byte status = 0;
     EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
     delay(100);
-    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED, val);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED, byte(val));
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_lastMenuSuccessfullyEnded_Day(byte val) // save info in EEPROM: the day on which the menu successfully ended last time
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY, val);
     delay(100);
     status = EEPROM.commit();
     delay(100);
@@ -936,6 +949,17 @@ byte getEeprom_lastMenuSuccessfullyEnded()
   val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
   delay(100);
   Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED: ");
+  Serial.println(val);
+  return val;
+}
+
+byte getEeprom_lastMenuSuccessfullyEnded_Day()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY);
+  delay(100);
+  Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY: ");
   Serial.println(val);
   return val;
 }
