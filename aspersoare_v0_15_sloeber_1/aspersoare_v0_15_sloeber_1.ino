@@ -123,8 +123,8 @@
 unsigned int nrMeniuAutomat = 0;
 
 
-#define DEVBABY1 // DEVBABY1 board
-//#define ASP     // ASP board
+//#define DEVBABY1 // DEVBABY1 board
+#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
 //#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
@@ -1403,7 +1403,7 @@ void loop()
   if (timerScheduledOneTime != FALSE)
   {	Serial.println("timerScheduledOneTime != FALSE");
 
-	if (menuNumberScheduledOneTime == 35)	// Handler for menu Nb 35
+	if (menuNumberScheduledOneTime == 35)	// Handler for menu Nb 35 (TEST MENU)
 	{	Serial.println("menuNumberScheduledOneTime == 35");
 		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
@@ -1502,6 +1502,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 35;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1512,7 +1514,7 @@ void loop()
 		}
 	}		// End of handler for menu Nb 35
 
-	if (menuNumberScheduledOneTime == 36)	// Handler for menu Nb 36
+	if (menuNumberScheduledOneTime == 36)	// Handler for menu Nb 36 (TEST MENU)
 	{	Serial.println("menuNumberScheduledOneTime == 36");
 		if (timerScheduledOneTimeStarted == FALSE)	// scheduled timer not yet started
 		{
@@ -1722,6 +1724,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 21;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1831,6 +1835,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 22;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1940,6 +1946,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 23;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2049,6 +2057,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 24;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2191,6 +2201,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 30;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2278,6 +2290,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 31;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2365,6 +2379,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 32;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2452,6 +2468,8 @@ void loop()
 				setEeprom_menuInProgress(menuInProgress);
 				lastMenuSuccessfullyEnded = 33;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
 			}
 
 			digitalWrite(REL_1, rel1_status);
