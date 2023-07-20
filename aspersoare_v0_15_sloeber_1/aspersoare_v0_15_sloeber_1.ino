@@ -33,8 +33,11 @@
 #define EEPROM_ADDR_MENU_IN_PROGRESS		   			12
 #define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED		13
 #define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_DAY	14
+#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_HOUR	15
+#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_MIN	16
+#define EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC	17
 
- #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       15 //to become 14 after handlers are implemented!!!!!
+ #define EEPROM_TOTAL_NB_OF_DEFINED_BYTES       18
 
 #define ONE_DAY_IN_MILISECONDS  86400000
 #define MAX_WIFI_DISC_LOOP_COUNTER 60
@@ -123,8 +126,8 @@
 unsigned int nrMeniuAutomat = 0;
 
 
-//#define DEVBABY1 // DEVBABY1 board
-#define ASP     // ASP board
+#define DEVBABY1 // DEVBABY1 board
+//#define ASP     // ASP board
 //#define DEVBIG	// Big (first) DEV board
 //#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
@@ -364,9 +367,15 @@ void getDateFromNTPToStruct(clock_and_date_type &timestruct)
     int monthDay = ptm->tm_mday;
     int currentMonth = ptm->tm_mon+1;
     int currentYear = ptm->tm_year+1900;
+    int currentHour = ptm->tm_hour;
+    int currentMinute = ptm->tm_min;
+    int currentSecond = ptm->tm_sec;
     timestruct.d = monthDay;
     timestruct.mo = currentMonth;
     timestruct.y = currentYear;
+    timestruct.h = currentHour;
+    timestruct.m = currentMinute;
+    timestruct.s = currentSecond;
 }
 
 void resetAllLoads()
@@ -732,6 +741,42 @@ byte setEeprom_lastMenuSuccessfullyEnded_Day(byte val) // save info in EEPROM: t
     return status;
 }
 
+byte setEeprom_lastMenuSuccessfullyEnded_Hour(byte val) // save info in EEPROM: the hour at which the menu successfully ended last time
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_HOUR, byte(val));
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_lastMenuSuccessfullyEnded_Min(byte val) // save info in EEPROM: the minute at which the menu successfully ended last time
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_MIN, byte(val));
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
+byte setEeprom_lastMenuSuccessfullyEnded_Sec(byte val) // save info in EEPROM: the second at which the menu successfully ended last time
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC, byte(val));
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
 void setEeprom_allParametersForScheduledOneTime()
 {
 	setEeprom_timerScheduledOneTime(timerScheduledOneTime);
@@ -964,6 +1009,39 @@ byte getEeprom_lastMenuSuccessfullyEnded_Day()
   return val;
 }
 
+byte getEeprom_lastMenuSuccessfullyEnded_Hour()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_HOUR);
+  delay(100);
+  Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_HOUR: ");
+  Serial.println(val);
+  return val;
+}
+
+byte getEeprom_lastMenuSuccessfullyEnded_Min()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_MIN);
+  delay(100);
+  Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_MIN: ");
+  Serial.println(val);
+  return val;
+}
+
+byte getEeprom_lastMenuSuccessfullyEnded_Sec()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC);
+  delay(100);
+  Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC: ");
+  Serial.println(val);
+  return val;
+}
+
 void eepromPrintAllVariables(WiFiClient client)
 {
 	client.println("*** Listing all EEPROM values **");
@@ -999,6 +1077,12 @@ void eepromPrintAllVariables(WiFiClient client)
 	client.println(getEeprom_lastMenuSuccessfullyEnded());
 	client.print("lastMenuSuccessfullyEnded_Day: ");
 	client.println(getEeprom_lastMenuSuccessfullyEnded_Day());
+	client.print("lastMenuSuccessfullyEnded_Hour: ");
+	client.println(getEeprom_lastMenuSuccessfullyEnded_Hour());
+	client.print("lastMenuSuccessfullyEnded_Minute: ");
+	client.println(getEeprom_lastMenuSuccessfullyEnded_Min());
+	client.print("lastMenuSuccessfullyEnded_Second: ");
+	client.println(getEeprom_lastMenuSuccessfullyEnded_Sec());
 	client.println("*** ************** **");
 }
 
@@ -1016,6 +1100,14 @@ void loadTimersDataFromEEPROM() // load saved timers configuration (of all types
 	menuNumberScheduledOneTime = getEeprom_menuNumberScheduledOneTime();
 	menuInProgress = getEeprom_menuInProgress();
 	lastMenuSuccessfullyEnded = getEeprom_lastMenuSuccessfullyEnded();
+}
+
+void saveLastMenuSuccessfullyEnded_Parameters()
+{
+	setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+	setEeprom_lastMenuSuccessfullyEnded_Hour(byte(gs_last_successful_menu_run.h));
+	setEeprom_lastMenuSuccessfullyEnded_Min(byte(gs_last_successful_menu_run.m));
+	setEeprom_lastMenuSuccessfullyEnded_Sec(byte(gs_last_successful_menu_run.s));
 }
 
 void updateLocalTimersInMainLoop()
@@ -1503,7 +1595,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 35;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1614,7 +1706,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 36;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1725,7 +1817,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 21;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1836,7 +1928,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 22;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -1947,7 +2039,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 23;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2058,7 +2150,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 24;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2202,7 +2294,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 30;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2291,7 +2383,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 31;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2380,7 +2472,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 32;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
@@ -2469,7 +2561,7 @@ void loop()
 				lastMenuSuccessfullyEnded = 33;
 				setEeprom_lastMenuSuccessfullyEnded(lastMenuSuccessfullyEnded);
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
-				setEeprom_lastMenuSuccessfullyEnded_Day(byte(gs_last_successful_menu_run.d));
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			digitalWrite(REL_1, rel1_status);
