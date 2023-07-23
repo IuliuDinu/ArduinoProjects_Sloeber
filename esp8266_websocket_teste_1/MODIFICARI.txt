@@ -1,0 +1,22 @@
+Modificari in:
+
+1. AsyncWebSocket.cpp
+	linia 959: 
+		void AsyncWebSocket::textAll(AsyncWebSocketMessageBuffer * buffer){
+		  if (!buffer)
+			  {	Serial.println("void AsyncWebSocket::textAll: <<!buffer>> ");
+				  return;
+			  }
+		  buffer->lock(); 
+		  for(const auto& c: _clients){
+			if(c->status() == WS_CONNECTED){
+				c->text(buffer);
+			}
+		  }
+		  buffer->unlock();
+		  _cleanBuffers(); 
+		}
+		
+	end linia 959
+	
+2. 
