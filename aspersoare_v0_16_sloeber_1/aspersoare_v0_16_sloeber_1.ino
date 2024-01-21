@@ -5,6 +5,7 @@
 #include <NTPClient.h>
 //#include <WiFiUdp.h>
 #include <EEPROM.h>
+#include <TaskScheduler.h>
 
 
 /************* EEPROM MAP ***********
@@ -134,11 +135,25 @@ unsigned int nrMeniuAutomat = 0;
 
 //#define DEVBABY1 // DEVBABY1 board
 //#define ASP     // ASP board
-//#define DEVBIG	// Big (first) DEV board
-#define ESPBOX1	// controller lumini spate
+#define DEVBIG	// Big (first) DEV board
+//#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
 
+#define D5	14
+#define D6	12
+#define D7	13
+
 #define TESTE
+
+Scheduler ts;
+
+void connectInit();
+void mainCallback();
+
+Task  tConnect    (TASK_SECOND, TASK_FOREVER, &connectInit, &ts, true);
+Task  tMain        (TASK_IMMEDIATE, TASK_FOREVER, &mainCallback, &ts, false);
+
+
 
 //ESP8266WiFiMulti wifiMulti; // Create an instance of the ESP8266WiFiMulti class, called 'wifiMulti'
 
@@ -152,7 +167,7 @@ const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
-#ifdef ESPBOX1
+#if ((defined ESPBOX1) || (defined DEVBIG))
 const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
@@ -1212,317 +1227,13 @@ void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply i
 	client.println(". Cancel it first");
 }
 
+void connectInit() {
+	blinkAllLeds(4,10);
+}
 
-void setup()
-{
-   //eepromEraseAddr01();
-   //eepromEraseRelLastState();
-	//eepromEraseAllDefinedBytes();
-	//eepromInitParticularByte(EEPROM_ADDR_RST_COUNTER);
-	//eepromInitParticularByte(EEPROM_ADDR_WIFI_CONN_COUNTER);
-	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
-	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_DAILY);
-	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS);
-	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_ONETIME);
-	//eepromInitParticularByte(EEPROM_ADDR_MENU_IN_PROGRESS);
-	//eepromInitParticularByte(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
-   wifiDisconnectedLoopCounter = 0;
-   wifiDisconnectedCounter = 0;
+void mainCallback() {
 
-   // TEMPORAR
-#ifdef ESPBOX1
-   timerScheduledDailyOneLoadOnly = TRUE;
-   menuNumberScheduledDailyOneLoadOnly = 50;
-   loadsScheduledDailyOneLoadOnly[1] = 1;
-#endif
-
-   Serial.begin(115200);
-   delay(100);
-   pinMode(REL_1, OUTPUT);
-   pinMode(REL_2, OUTPUT);
-   pinMode(REL_3, OUTPUT);
-
-   digitalWrite(REL_1, LOW);
-   digitalWrite(REL_2, LOW);
-   digitalWrite(REL_3, LOW);
-
-   relStatusSaveToEepromFailed = 0;
-
-#if defined (ESPBOX1) || defined (ESPBOX2)
-   // in case EEPROM_GET_REL_STATE_RETURN_ERROR is returned, %2 will be 0
-   digitalWrite(REL_1, (getEepromRel_1()%2));
-   digitalWrite(REL_2, (getEepromRel_2()%2));
-   digitalWrite(REL_3, (getEepromRel_3()%2));
-#endif
-
-#ifdef DEVBABY1
-   digitalWrite(REL_1, HIGH);
-   digitalWrite(REL_2, HIGH);
-   digitalWrite(REL_3, HIGH);
-#endif
-
-
-  // Connect to WiFi
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  Serial.println(" ");
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {    delay(20000);
-      wifiWaitCounter++;
-      Serial.print(wifiWaitCounter);
-      Serial.print(", ");
-      if (wifiWaitCounter > 10)
-      {
-          ESP.restart();
-      }
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-
-  if (WiFi.status() == WL_CONNECTED)
-  {
-#ifdef DEVBABY1
-	   digitalWrite(REL_1, LOW);
-	   digitalWrite(REL_2, HIGH);
-	   digitalWrite(REL_3, LOW);
-#endif
-        // Initialize a NTPClient to get time
-        timeClient.begin();
-        delay(100);
-        // Set offset time in seconds to adjust for your timezone, for example:
-        // GMT +1 = 3600
-        // GMT +8 = 28800
-        // GMT -1 = -3600
-        // GMT 0 = 0
-        //timeClient.setTimeOffset(10800); // SUMMER TIME
-        timeClient.setTimeOffset(7200); // WINTER TIME
-
-        bool syncSuccess = 0;
-        syncSuccess = syncWithNTP();
-
-        if (syncSuccess)
-        {
-          Serial.println("Setup: timeClientUpdateSuccess");
-          formattedStartupTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
-          Serial.print("Formatted START-UP Time: ");
-          Serial.println(formattedStartupTime);
-        }
-
-        getDateFromNTP(startupDate);
-
-
-      wifiConnectedTimeBySystemTime = millis()/1000;
-      //Serial.println("timeClientUpdateSuccess");
-      connectedTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
-      Serial.print("Formatted WiFi connected Time: ");
-      Serial.println(connectedTime);
-      EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used
-      delay(100);
-      nbOfWifiConnectedTimes = EEPROM.read(EEPROM_ADDR_WIFI_CONN_COUNTER);
-      nbOfWifiConnectedTimes++;
-      delay(100);
-      EEPROM.write(EEPROM_ADDR_WIFI_CONN_COUNTER, nbOfWifiConnectedTimes);
-      delay(100);
-      if (EEPROM.commit())
-      {
-        Serial.println("EEPROM has been updated.");
-      }
-      else
-      {
-        Serial.println("EEPROM commit failed.");
-      }
-        delay(100);
-    }
-    else
-    {
-      Serial.println("WIFI != CONNECTED, pula mea");
-    }
-
-   server.begin();
-  Serial.println("Server started");
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.println(WiFi.localIP());
-  connectedIP = WiFi.localIP();
-  Serial.print("int connectedIP = ");
-  Serial.println(connectedIP);
-  Serial.println(IPAddress(connectedIP));
-
-#ifdef DEVBABY1x // we use multiple connection options for this devboard
-  if (connectedIP != 1023518912) // which means 192.168.1.61 - for TPLink
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef DEVBABY1 // we use multiple connection options for this devboard
-  if (connectedIP != 1023519168) // which means 192.169.1.61 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ASPx
-  if (connectedIP != 1040296128) // which means 192.168.1.62
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ASP
-  if (connectedIP != 1040296384) // which means 192.169.1.62 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef DEVBIG
-  if (connectedIP != 1006741952) // which means 192.169.1.60
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ESPBOX1x
-  if (connectedIP != 1090627776) // which means 192.168.1.65
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ESPBOX1
-  if (connectedIP != 1090628032) // which means 192.169.1.65 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ESPBOX2
-  if (connectedIP != 1107404992) // which means 192.168.1.66
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-  // Start of OTA configuration
-#ifdef DEVBABY1
-  ArduinoOTA.setHostname("DEVBABY1");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ASP
-  ArduinoOTA.setHostname("ASP");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef DEVBIG
-  ArduinoOTA.setHostname("DEVBIG");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ESPBOX1
-  ArduinoOTA.setHostname("ESPBOX1");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ESPBOX2
-  ArduinoOTA.setHostname("ESPBOX2");
-  ArduinoOTA.setPassword("ototo");
-#endif
-
-  ArduinoOTA.onStart([]()
-  {
-    Serial.println("OTA_Start");
-  });
-
-  ArduinoOTA.onEnd([]()
-  {
-    Serial.println("\nOTA_End");
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-  {
-    Serial.printf("OTA_Progress: %u%%\r", (progress / (total / 100)));
-  });
-
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-    Serial.printf("OTA_Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("OTA_Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("OTA_Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("OTA_Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA_Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("OTA_End Failed");
-  });
-
-  ArduinoOTA.begin();
-  Serial.println("OTA ready");
-  // End of OTA configuration
-
-
-
-
-  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte
-  delay(100);
-  nbofresets = EEPROM.read(EEPROM_ADDR_RST_COUNTER);
-  nbofresets++;
-  delay(100);
-  EEPROM.write(EEPROM_ADDR_RST_COUNTER, nbofresets);
-  delay(100);
-  if (EEPROM.commit())
-  {
-    Serial.println("EEPROM has been updated.");
-  }
-  else
-  {
-    Serial.println("EEPROM commit failed.");
-  }
-  delay(100);
-
-  //load EEPROM REL values
-#if defined (ESPBOX1) || defined (ESPBOX2)
-  rel1_status = getEepromRel_1();
-  rel2_status = getEepromRel_2();
-  rel3_status = getEepromRel_3();
-  digitalWrite(REL_1, rel1_status);
-  digitalWrite(REL_2, rel2_status);
-  digitalWrite(REL_3, rel3_status);
-
-  Serial.print("rel1_status: ");
-  Serial.println(rel1_status);
-  Serial.print("rel2_status: ");
-  Serial.println(rel2_status);
-  Serial.print("rel3_status: ");
-  Serial.println(rel3_status);
-#endif
-
-  //load EEPROM values related to timers scheduled daily or one-time
-  loadTimersDataFromEEPROM();
-
-  timestampForNextNTPSync = millis();
-
-} //end of setup()
-
-void loop()
-{
+	blinkAllLeds(1,1);
   if (!WiFi.isConnected())
   {
     Serial.println("WiFi was disconnected");
@@ -3403,6 +3114,9 @@ void loop()
 #ifdef ASP
            client.println("* Device: ASPERSOARE si PICURATOARE *");
 #endif
+#ifdef DEVBIG
+           client.println("* Device: DEVBIG *");
+#endif
 #ifdef DEVBABY1
            client.println("* Device: Placa dezvoltare <DEVBABY1> *");
 #endif
@@ -5027,4 +4741,328 @@ void loop()
   delay(1);
   //Serial.println("Client disonnected");
   //Serial.println("");
+
+}
+
+
+void setup()
+{
+   pinMode(REL_1, OUTPUT);
+   pinMode(REL_2, OUTPUT);
+   pinMode(REL_3, OUTPUT);
+   //eepromEraseAddr01();
+   //eepromEraseRelLastState();
+	//eepromEraseAllDefinedBytes();
+	//eepromInitParticularByte(EEPROM_ADDR_RST_COUNTER);
+	//eepromInitParticularByte(EEPROM_ADDR_WIFI_CONN_COUNTER);
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_DAILY_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_DAILY);
+	//eepromInitParticularByte(EEPROM_ADDR_TIMER_SCH_ONETIME_PARAMS);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_NB_SCH_ONETIME);
+	//eepromInitParticularByte(EEPROM_ADDR_MENU_IN_PROGRESS);
+	//eepromInitParticularByte(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
+   wifiDisconnectedLoopCounter = 0;
+   wifiDisconnectedCounter = 0;
+
+   // TEMPORAR
+#ifdef ESPBOX1
+   timerScheduledDailyOneLoadOnly = TRUE;
+   menuNumberScheduledDailyOneLoadOnly = 50;
+   loadsScheduledDailyOneLoadOnly[1] = 1;
+#endif
+
+   Serial.begin(115200);
+   delay(100);
+
+
+   delay(2000);
+   blinkAllLeds(2,10);
+
+   digitalWrite(REL_1, LOW);
+   digitalWrite(REL_2, LOW);
+   digitalWrite(REL_3, LOW);
+
+   relStatusSaveToEepromFailed = 0;
+
+#if defined (ESPBOX1) || defined (ESPBOX2) || defined (DEVBIG)
+   // in case EEPROM_GET_REL_STATE_RETURN_ERROR is returned, %2 will be 0
+   digitalWrite(REL_1, (getEepromRel_1()%2));
+   digitalWrite(REL_2, (getEepromRel_2()%2));
+   digitalWrite(REL_3, (getEepromRel_3()%2));
+#endif
+
+#ifdef DEVBABY1
+   digitalWrite(REL_1, HIGH);
+   digitalWrite(REL_2, HIGH);
+   digitalWrite(REL_3, HIGH);
+#endif
+
+
+  // Connect to WiFi
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  Serial.println(" ");
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED)
+  {    delay(20000);
+      wifiWaitCounter++;
+      Serial.print(wifiWaitCounter);
+      Serial.print(", ");
+      if (wifiWaitCounter > 10)
+      {
+          ESP.restart();
+      }
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+#ifdef DEVBABY1
+	   digitalWrite(REL_1, LOW);
+	   digitalWrite(REL_2, HIGH);
+	   digitalWrite(REL_3, LOW);
+#endif
+        // Initialize a NTPClient to get time
+        timeClient.begin();
+        delay(100);
+        // Set offset time in seconds to adjust for your timezone, for example:
+        // GMT +1 = 3600
+        // GMT +8 = 28800
+        // GMT -1 = -3600
+        // GMT 0 = 0
+        //timeClient.setTimeOffset(10800); // SUMMER TIME
+        timeClient.setTimeOffset(7200); // WINTER TIME
+
+        bool syncSuccess = 0;
+        syncSuccess = syncWithNTP();
+
+        if (syncSuccess)
+        {
+          Serial.println("Setup: timeClientUpdateSuccess");
+          formattedStartupTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
+          Serial.print("Formatted START-UP Time: ");
+          Serial.println(formattedStartupTime);
+        }
+
+        getDateFromNTP(startupDate);
+
+
+      wifiConnectedTimeBySystemTime = millis()/1000;
+      //Serial.println("timeClientUpdateSuccess");
+      connectedTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
+      Serial.print("Formatted WiFi connected Time: ");
+      Serial.println(connectedTime);
+      EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used
+      delay(100);
+      nbOfWifiConnectedTimes = EEPROM.read(EEPROM_ADDR_WIFI_CONN_COUNTER);
+      nbOfWifiConnectedTimes++;
+      delay(100);
+      EEPROM.write(EEPROM_ADDR_WIFI_CONN_COUNTER, nbOfWifiConnectedTimes);
+      delay(100);
+      if (EEPROM.commit())
+      {
+        Serial.println("EEPROM has been updated.");
+      }
+      else
+      {
+        Serial.println("EEPROM commit failed.");
+      }
+        delay(100);
+    }
+    else
+    {
+      Serial.println("WIFI != CONNECTED, pula mea");
+    }
+
+   server.begin();
+  Serial.println("Server started");
+  // Print the IP address
+  Serial.print("Use this URL to connect: ");
+  Serial.print("http://");
+  Serial.println(WiFi.localIP());
+  connectedIP = WiFi.localIP();
+  Serial.print("int connectedIP = ");
+  Serial.println(connectedIP);
+  Serial.println(IPAddress(connectedIP));
+
+#ifdef DEVBABY1x // we use multiple connection options for this devboard
+  if (connectedIP != 1023518912) // which means 192.168.1.61 - for TPLink
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef DEVBABY1 // we use multiple connection options for this devboard
+  if (connectedIP != 1023519168) // which means 192.169.1.61 - for Kaon
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ASPx
+  if (connectedIP != 1040296128) // which means 192.168.1.62
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ASP
+  if (connectedIP != 1040296384) // which means 192.169.1.62 - for Kaon
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef DEVBIG
+  if (connectedIP != 1006741952) // which means 192.169.1.60
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ESPBOX1x
+  if (connectedIP != 1090627776) // which means 192.168.1.65
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ESPBOX1
+  if (connectedIP != 1090628032) // which means 192.169.1.65 - for Kaon
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+#ifdef ESPBOX2
+  if (connectedIP != 1107404992) // which means 192.168.1.66
+  {
+    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("!!!!!!!!!!!!!");
+    ESP.restart();
+  }
+#endif
+
+  // Start of OTA configuration
+#ifdef DEVBABY1
+  ArduinoOTA.setHostname("DEVBABY1");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef ASP
+  ArduinoOTA.setHostname("ASP");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef DEVBIG
+  ArduinoOTA.setHostname("DEVBIG");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef ESPBOX1
+  ArduinoOTA.setHostname("ESPBOX1");
+  ArduinoOTA.setPassword("ototo");
+#endif
+#ifdef ESPBOX2
+  ArduinoOTA.setHostname("ESPBOX2");
+  ArduinoOTA.setPassword("ototo");
+#endif
+
+  ArduinoOTA.onStart([]()
+  {
+    Serial.println("OTA_Start");
+  });
+
+  ArduinoOTA.onEnd([]()
+  {
+    Serial.println("\nOTA_End");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+  {
+    Serial.printf("OTA_Progress: %u%%\r", (progress / (total / 100)));
+  });
+
+  ArduinoOTA.onError([](ota_error_t error)
+  {
+    Serial.printf("OTA_Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("OTA_Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("OTA_Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("OTA_Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA_Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("OTA_End Failed");
+  });
+
+  ArduinoOTA.begin();
+  Serial.println("OTA ready");
+  // End of OTA configuration
+
+
+
+
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte
+  delay(100);
+  nbofresets = EEPROM.read(EEPROM_ADDR_RST_COUNTER);
+  nbofresets++;
+  delay(100);
+  EEPROM.write(EEPROM_ADDR_RST_COUNTER, nbofresets);
+  delay(100);
+  if (EEPROM.commit())
+  {
+    Serial.println("EEPROM has been updated.");
+  }
+  else
+  {
+    Serial.println("EEPROM commit failed.");
+  }
+  delay(100);
+
+  //load EEPROM REL values
+#if defined (ESPBOX1) || defined (ESPBOX2)
+  rel1_status = getEepromRel_1();
+  rel2_status = getEepromRel_2();
+  rel3_status = getEepromRel_3();
+  digitalWrite(REL_1, rel1_status);
+  digitalWrite(REL_2, rel2_status);
+  digitalWrite(REL_3, rel3_status);
+
+  Serial.print("rel1_status: ");
+  Serial.println(rel1_status);
+  Serial.print("rel2_status: ");
+  Serial.println(rel2_status);
+  Serial.print("rel3_status: ");
+  Serial.println(rel3_status);
+#endif
+
+  //load EEPROM values related to timers scheduled daily or one-time
+  loadTimersDataFromEEPROM();
+
+  timestampForNextNTPSync = millis();
+  blinkAllLeds(3,10);
+
+  tConnect.setInterval(1000);
+  tMain.enable();
+
+} //end of setup()
+
+void loop()
+{
+	ts.execute();
+
 }
