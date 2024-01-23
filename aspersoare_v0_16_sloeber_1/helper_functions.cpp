@@ -1,10 +1,5 @@
 #include "helper_functions.h"
-//#include "Arduino.h"
-//#include "aspersoare_v0_16_sloeber_1.ino"
 
-//extern unsigned int REL_1;
-//extern unsigned int REL_2;
-//extern unsigned int REL_3;
 
 void blinkAllLeds(byte nbOfTimes, byte period)
 {

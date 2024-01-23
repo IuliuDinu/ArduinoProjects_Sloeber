@@ -6,6 +6,7 @@
 //#include <WiFiUdp.h>
 #include <EEPROM.h>
 #include <TaskScheduler.h>
+#include "gpio_defs.h"
 #include "EEPROM_defs.h"
 #include "menu_defs.h"
 #include "helper_functions.h"
@@ -36,9 +37,6 @@ unsigned int nrMeniuAutomat = 0;
 //#define ESPBOX1	// controller lumini spate
 //#define ESPBOX2	// controller lumini fata
 
-#define D5	14
-#define D6	12
-#define D7	13
 
 #define TESTE
 
@@ -47,7 +45,7 @@ Scheduler ts;
 void connectInit();
 void mainCallback();
 
-extern void blinkAllLeds(byte nbOfTimes, byte period);
+
 
 Task  tConnect    (TASK_SECOND, TASK_FOREVER, &connectInit, &ts, true);
 Task  tMain        (TASK_IMMEDIATE, TASK_FOREVER, &mainCallback, &ts, false);
@@ -76,16 +74,7 @@ const char* ssid = "Gorlitze";
 const char* password = "A1b2C3d4";
 #endif
 
-//int LED1 = 14; //D7 ESP Board
-//int LED2 = 12; //D6 ESP Board
-//int LED3 = 5; //D1 ESP Board
-//int LED4 = 4;  //D2 ESP Board
-//int BTN1 = 5;
-unsigned int REL_1 = 14;
-unsigned int REL_2 = 12;
-unsigned int REL_3 = 13;
-//unsigned int REL_1 = 2;
-//unsigned int REL_2 = 15;
+
 
 //int value4 = LOW;
 
@@ -200,6 +189,8 @@ clock_and_date_type gs_last_successful_menu_run = {0};
 #ifdef TESTE
 clock_and_date_type gs_clockdate_test = {0};
 #endif
+
+extern void blinkAllLeds(byte nbOfTimes, byte period);
 
 
 void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var)
