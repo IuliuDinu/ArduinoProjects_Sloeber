@@ -28,6 +28,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/ESP8266mDNS/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/TaskScheduler/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/TaskScheduler/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.390970686" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -42,6 +43,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/ESP8266mDNS/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/TaskScheduler/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/TaskScheduler/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.2021241426" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -56,6 +58,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/ESP8266mDNS/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/TaskScheduler/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aspersoare_v0_16_sloeber_1/libraries/TaskScheduler/src}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.1398592975" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

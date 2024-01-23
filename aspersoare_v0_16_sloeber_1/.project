@@ -71,5 +71,10 @@
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/NTPClient/3.2.1</locationURI>
 		</link>
+		<link>
+			<name>libraries/TaskScheduler</name>
+			<type>2</type>
+			<location>C:/Users/Aleczander/Documents/Arduino/libraries/TaskScheduler</location>
+		</link>
 	</linkedResources>
 </projectDescription>
