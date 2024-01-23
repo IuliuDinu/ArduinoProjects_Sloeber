@@ -10,7 +10,7 @@
 #include "menu_defs.h"
 #include "helper_functions.h"
 
-extern void blinkAllLeds(byte nbOfTimes, byte period);
+
 
 
 #define ONE_DAY_IN_MILISECONDS  86400000
@@ -46,6 +46,8 @@ Scheduler ts;
 
 void connectInit();
 void mainCallback();
+
+extern void blinkAllLeds(byte nbOfTimes, byte period);
 
 Task  tConnect    (TASK_SECOND, TASK_FOREVER, &connectInit, &ts, true);
 Task  tMain        (TASK_IMMEDIATE, TASK_FOREVER, &mainCallback, &ts, false);
@@ -199,24 +201,6 @@ clock_and_date_type gs_last_successful_menu_run = {0};
 clock_and_date_type gs_clockdate_test = {0};
 #endif
 
-//void blinkAllLeds(byte nbOfTimes, byte period)
-//{
-//	for (int i=0; i<nbOfTimes; i++)
-//	{
-//		digitalWrite(REL_1, HIGH);
-//		delay(period/2);
-//		digitalWrite(REL_1, LOW);
-//		delay(period/2);
-//		digitalWrite(REL_2, HIGH);
-//		delay(period/2);
-//		digitalWrite(REL_2, LOW);
-//		delay(period/2);
-//		digitalWrite(REL_3, HIGH);
-//		delay(period/2);
-//		digitalWrite(REL_3, LOW);
-//		delay(period/2);
-//	}
-//}
 
 void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var)
 {
@@ -1125,12 +1109,12 @@ void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply i
 }
 
 void connectInit() {
-	//blinkAllLeds(4,10);
+	blinkAllLeds(4,10);
 }
 
 void mainCallback() {
 
-	//blinkAllLeds(1,1);
+	blinkAllLeds(1,1);
   if (!WiFi.isConnected())
   {
     Serial.println("WiFi was disconnected");
@@ -4673,7 +4657,7 @@ void setup()
 
 
    delay(2000);
-   //blinkAllLeds(2,10);
+   blinkAllLeds(2,10);
 
    digitalWrite(REL_1, LOW);
    digitalWrite(REL_2, LOW);
@@ -4951,7 +4935,7 @@ void setup()
   loadTimersDataFromEEPROM();
 
   timestampForNextNTPSync = millis();
-  //blinkAllLeds(3,10);
+  blinkAllLeds(3,10);
 
   tConnect.setInterval(1000);
   tMain.enable();
