@@ -13,14 +13,15 @@
 #include "EEPROM_functions.h"
 #include "logical_defs.h"
 #include "specific_typedefs.h"
+#include "NTP_functions.h"
 
 
-#define ONE_DAY_IN_MILISECONDS  86400000
-#define MAX_WIFI_DISC_LOOP_COUNTER 60
-//#define TIME_INTERVAL_TO_RECHECK_NTP	300000 // 300000ms = 5 min
-#define TIME_INTERVAL_TO_RECHECK_NTP	900000 // 900000ms = 15 min
-//#define TIME_INTERVAL_TO_RECHECK_NTP	60000 // 60000ms = 1 min
-#define AVG_MEASURED_MAIN_LOOP_DURATION_MS	502
+//#define ONE_DAY_IN_MILISECONDS  86400000
+//#define MAX_WIFI_DISC_LOOP_COUNTER 60
+////#define TIME_INTERVAL_TO_RECHECK_NTP	300000 // 300000ms = 5 min
+//#define TIME_INTERVAL_TO_RECHECK_NTP	900000 // 900000ms = 15 min
+////#define TIME_INTERVAL_TO_RECHECK_NTP	60000 // 60000ms = 1 min
+//#define AVG_MEASURED_MAIN_LOOP_DURATION_MS	502
 
 
 
@@ -162,61 +163,7 @@ clock_and_date_type gs_last_successful_menu_run = {0};
 clock_and_date_type gs_clockdate_test = {0};
 #endif
 
-extern void blinkAllLeds(byte nbOfTimes, byte period);
-
-
-void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var)
-{
-  hms_var->h = 0;
-  hms_var->m = 0;
-  hms_var->s = 0;
-
-  if (ul_sec > 3600)
-  {
-    hms_var->h = ul_sec/3600;
-
-    if (hms_var->h >= 24)
-    {
-      hms_var->h -=24;
-    }
-
-    ul_sec -= (hms_var->h*3600);
-  }
-
-  if (ul_sec > 60)
-  {
-    hms_var->m = ul_sec/60;
-    ul_sec -= (hms_var->m*60);
-  }
-
-  hms_var->s = ul_sec;
-}
-
-void get24HMaxMillis()
-{
-  gul_max24hMillis = millis();
-  if (gul_max24hMillis > ONE_DAY_IN_MILISECONDS)
-  {
-    unsigned long multiplier = gul_max24hMillis/ONE_DAY_IN_MILISECONDS;
-    gul_max24hMillis -= (multiplier*ONE_DAY_IN_MILISECONDS);
-  }
-}
-
-bool syncWithNTP()
-{
-  bool timeClientUpdateSuccess = 0;
-  timeClientUpdateSuccess = timeClient.update(); //This is the actual get Internet time
-
-  if (timeClientUpdateSuccess)
-    {
-      localTime = (timeClient.getHours()*3600)+(timeClient.getMinutes()*60)+timeClient.getSeconds();
-      localTimeMs = localTime * 1000;
-      get24HMaxMillis();
-      syncTime = gul_max24hMillis/1000;
-    }
-
-  return timeClientUpdateSuccess;
-}
+//extern void blinkAllLeds(byte nbOfTimes, byte period);
 
 void updateLocalTime()
 {
@@ -228,46 +175,6 @@ void updateLocalTime()
   }
   localTime = localTime + (gul_max24hMillis/1000) - syncTime;
   syncTime = gul_max24hMillis/1000;
-}
-
-void getDateFromNTP(String &date)
-{
-    time_t epochTime = timeClient.getEpochTime();
-    struct tm *ptm = gmtime ((time_t *)&epochTime);
-    int monthDay = ptm->tm_mday;
-    int currentMonth = ptm->tm_mon+1;
-    int currentYear = ptm->tm_year+1900;
-    date = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
-}
-
-void getDateFromNTPToStruct(clock_and_date_type &timestruct)
-{
-    time_t epochTime = timeClient.getEpochTime();
-    struct tm *ptm = gmtime ((time_t *)&epochTime);
-    int monthDay = ptm->tm_mday;
-    int currentMonth = ptm->tm_mon+1;
-    int currentYear = ptm->tm_year+1900;
-    int weekDay = ptm->tm_wday;
-    int currentHour = ptm->tm_hour;
-    int currentMinute = ptm->tm_min;
-    int currentSecond = ptm->tm_sec;
-    timestruct.d = monthDay;
-    timestruct.mo = currentMonth;
-    timestruct.y = currentYear;
-    timestruct.h = currentHour;
-    timestruct.m = currentMinute;
-    timestruct.s = currentSecond;
-    timestruct.wd = weekDay;
-}
-
-void resetAllLoads()
-{
-	rel1_status = LOW;
-	rel2_status = LOW;
-	rel3_status = LOW;
-	digitalWrite(REL_1, rel1_status);
-	digitalWrite(REL_2, rel2_status);
-	digitalWrite(REL_3, rel3_status);
 }
 
 
