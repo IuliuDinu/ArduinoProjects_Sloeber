@@ -10,6 +10,7 @@ extern byte rel3_status;
 
 
 void blinkAllLeds(byte nbOfTimes, byte period);
+void blinkOneLed(byte load, byte nbOfTimes, byte period);
 void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var);
 void get24HMaxMillis();
 void resetAllLoads();

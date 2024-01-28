@@ -19,6 +19,17 @@ void blinkAllLeds(byte nbOfTimes, byte period)
 	}
 }
 
+void blinkOneLed(byte load, byte nbOfTimes, byte period)
+{
+	for (int i=0; i<nbOfTimes; i++)
+	{
+		digitalWrite(load, HIGH);
+		delay(period/2);
+		digitalWrite(load, LOW);
+		delay(period/2);
+	}
+}
+
 void resetAllLoads()
 {
 	rel1_status = LOW;

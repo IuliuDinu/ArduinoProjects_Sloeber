@@ -1,3 +1,6 @@
+#define _TASK_SLEEP_ON_IDLE_RUN
+#define _TASK_STATUS_REQUEST
+
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 //#include <ESP8266WiFiMulti.h>
@@ -14,6 +17,7 @@
 #include "logical_defs.h"
 #include "specific_typedefs.h"
 #include "NTP_functions.h"
+#include "time_client_functions.h"
 
 
 //#define ONE_DAY_IN_MILISECONDS  86400000
@@ -41,6 +45,8 @@ unsigned int nrMeniuAutomat = 0;
 
 Scheduler ts;
 
+
+
 void connectInit();
 void mainCallback();
 
@@ -56,6 +62,10 @@ Task  tMain        (TASK_IMMEDIATE, TASK_FOREVER, &mainCallback, &ts, false);
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
+
+#define CONNECT_TIMEOUT   180      // Iterations
+#define CONNECT_OK        0       // Status of successful connection to WiFi
+#define CONNECT_FAILED    (-99)   // Status of failed connection to WiFi
 
 
 #if ((defined ASP) || (defined DEVBABY1)) // we use multiple connection options for ASP
@@ -121,12 +131,14 @@ byte actualLoadInProgress = 0;	// refers to any type of program, used to switch 
 byte menuInProgress = 0; // refers to any menu, when it's actually running
 byte lastMenuSuccessfullyEnded = 0; // gets the value of the last menu
 
+bool timeClientSetupWasPerformed = 0;
+
 
 // Will keep board startup time
 String formattedStartupTime;
 String startupDate;
 String connectedTime;
-String connectedDate;
+String connectedDate; // TBD if used
 u32_t connectedIP;
 
 WiFiServer server(80);
@@ -247,14 +259,78 @@ void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply i
 
 void connectInit() {
 	blinkAllLeds(4,10);
+
+	blinkOneLed(REL_2, 1, 2);
+	Serial.print(millis());
+	Serial.println(F(": connectInit."));
+	Serial.println(F("WiFi parameters: "));
+	Serial.print(F("SSID: ")); Serial.println(ssid);
+	Serial.print(F("PWD : ")); Serial.println(password);
+
+	WiFi.mode(WIFI_STA);
+	WiFi.hostname("DEV_MARE");
+	WiFi.begin(ssid, password);
+	yield();
+
+	tConnect.yield(&connectCheck);            // This will pass control back to Scheduler and then continue with connection checking
+	blinkOneLed(REL_2, 1, 2);
+}
+
+void connectCheck() {
+   digitalWrite(D6, HIGH);
+   Serial.print(millis());
+   Serial.println(F(": connectCheck."));
+
+  if (WiFi.status() == WL_CONNECTED) {                // Connection established
+    Serial.print(millis());
+    Serial.print(F(": Connected to AP. Local ip: "));
+    Serial.println(WiFi.localIP());
+    Serial.println(F(": tConnect.disable() will NOT follow"));
+    blinkOneLed(REL_3, 5, 2);
+
+    tConnect.setInterval(5000);
+
+    //tConnect.disable();
+  }
+  else {
+
+    tConnect.setInterval(1000);
+
+    if (tConnect.getRunCounter() % 10 == 0) {          // re-request connection every 10 seconds
+
+      Serial.print(millis());
+      Serial.println(F(": Re-requesting connection to AP..."));
+
+      WiFi.disconnect(true);
+      yield();                                        // This is an esp8266 standard yield to allow linux wifi stack run
+      WiFi.hostname("DEV_MARE");
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(ssid, password);
+      yield();                                        // This is an esp8266 standard yield to allow linux wifi stack run
+    }
+
+    if (tConnect.getRunCounter() == CONNECT_TIMEOUT) {  // Connection Timeout
+      tConnect.getInternalStatusRequest()->signal(CONNECT_FAILED);  // Signal unsuccessful completion
+      tConnect.disable();
+
+      Serial.print(millis());
+      Serial.println(F(": connectOnDisable."));
+      Serial.print(millis());
+      Serial.println(F(": Unable to connect to WiFi."));
+
+    }
+  }
+   digitalWrite(D6, LOW);
 }
 
 void mainCallback() {
 
-	blinkAllLeds(1,1);
+	blinkOneLed(REL_1, 1, 1);
+	blinkOneLed(REL_2, 1, 1);
+	blinkOneLed(REL_3, 1, 1);
   if (!WiFi.isConnected())
   {
-    Serial.println("WiFi was disconnected");
+    Serial.println("MAIN: WiFi was disconnected");
     if (wifiDisconnectedLoopCounter > MAX_WIFI_DISC_LOOP_COUNTER)
       {
         //save EEPROM REL values - neah, already done when set on/off
@@ -3819,24 +3895,25 @@ void setup()
   // Connect to WiFi
   Serial.println();
   Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-  Serial.println(" ");
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {    delay(20000);
-      wifiWaitCounter++;
-      Serial.print(wifiWaitCounter);
-      Serial.print(", ");
-      if (wifiWaitCounter > 10)
-      {
-          ESP.restart();
-      }
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
+  Serial.println("SETUP: passed connection connectInit() function");
+//  Serial.print("Connecting to ");
+//  Serial.println(ssid);
+//  Serial.println(" ");
+//
+//  WiFi.mode(WIFI_STA);
+//  WiFi.begin(ssid, password);
+//  while (WiFi.status() != WL_CONNECTED)
+//  {    delay(20000);
+//      wifiWaitCounter++;
+//      Serial.print(wifiWaitCounter);
+//      Serial.print(", ");
+//      if (wifiWaitCounter > 10)
+//      {
+//          ESP.restart();
+//      }
+//  }
+//  Serial.println("");
+//  Serial.println("WiFi connected");
 
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -3845,36 +3922,10 @@ void setup()
 	   digitalWrite(REL_2, HIGH);
 	   digitalWrite(REL_3, LOW);
 #endif
-        // Initialize a NTPClient to get time
-        timeClient.begin();
-        delay(100);
-        // Set offset time in seconds to adjust for your timezone, for example:
-        // GMT +1 = 3600
-        // GMT +8 = 28800
-        // GMT -1 = -3600
-        // GMT 0 = 0
-        //timeClient.setTimeOffset(10800); // SUMMER TIME
-        timeClient.setTimeOffset(7200); // WINTER TIME
 
-        bool syncSuccess = 0;
-        syncSuccess = syncWithNTP();
-
-        if (syncSuccess)
-        {
-          Serial.println("Setup: timeClientUpdateSuccess");
-          formattedStartupTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
-          Serial.print("Formatted START-UP Time: ");
-          Serial.println(formattedStartupTime);
-        }
-
-        getDateFromNTP(startupDate);
+	   performTimeClientSetup();
 
 
-      wifiConnectedTimeBySystemTime = millis()/1000;
-      //Serial.println("timeClientUpdateSuccess");
-      connectedTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
-      Serial.print("Formatted WiFi connected Time: ");
-      Serial.println(connectedTime);
       EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used
       delay(100);
       nbOfWifiConnectedTimes = EEPROM.read(EEPROM_ADDR_WIFI_CONN_COUNTER);
@@ -3949,7 +4000,7 @@ void setup()
   {
     Serial.println("Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
+    //ESP.restart();												// TBD: to uncomment and move this entire section elsewhere
   }
 #endif
 
@@ -4002,34 +4053,36 @@ void setup()
   ArduinoOTA.setPassword("ototo");
 #endif
 
-  ArduinoOTA.onStart([]()
-  {
-    Serial.println("OTA_Start");
-  });
 
-  ArduinoOTA.onEnd([]()
-  {
-    Serial.println("\nOTA_End");
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
-  {
-    Serial.printf("OTA_Progress: %u%%\r", (progress / (total / 100)));
-  });
-
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-    Serial.printf("OTA_Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("OTA_Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("OTA_Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("OTA_Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA_Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("OTA_End Failed");
-  });
-
-  ArduinoOTA.begin();
-  Serial.println("OTA ready");
-  // End of OTA configuration
+ // TBD: TO UNCOMMENT AND MOVE FROM HERE
+//  ArduinoOTA.onStart([]()
+//  {
+//    Serial.println("OTA_Start");
+//  });
+//
+//  ArduinoOTA.onEnd([]()
+//  {
+//    Serial.println("\nOTA_End");
+//  });
+//
+//  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+//  {
+//    Serial.printf("OTA_Progress: %u%%\r", (progress / (total / 100)));
+//  });
+//
+//  ArduinoOTA.onError([](ota_error_t error)
+//  {
+//    Serial.printf("OTA_Error[%u]: ", error);
+//    if (error == OTA_AUTH_ERROR) Serial.println("OTA_Auth Failed");
+//    else if (error == OTA_BEGIN_ERROR) Serial.println("OTA_Begin Failed");
+//    else if (error == OTA_CONNECT_ERROR) Serial.println("OTA_Connect Failed");
+//    else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA_Receive Failed");
+//    else if (error == OTA_END_ERROR) Serial.println("OTA_End Failed");
+//  });
+//
+//  ArduinoOTA.begin();
+//  Serial.println("OTA ready");
+//  // End of OTA configuration
 
 
 
