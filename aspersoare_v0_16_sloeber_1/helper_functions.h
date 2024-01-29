@@ -20,3 +20,4 @@ void get24HMaxMillis();
 void resetAllLoads();
 void serverBegin();
 void OTASetup();
+void checkCorrectIPObtained();

@@ -1,6 +1,13 @@
 #define _TASK_SLEEP_ON_IDLE_RUN
 #define _TASK_STATUS_REQUEST
 
+// Platform selection
+//#define DEVBABY1 // DEVBABY1 board
+//#define ASP     // ASP board
+#define DEVBIG	// Big (first) DEV board
+//#define ESPBOX1	// controller lumini spate
+//#define ESPBOX2	// controller lumini fata
+
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 //#include <ESP8266WiFiMulti.h>
@@ -34,11 +41,7 @@
 unsigned int nrMeniuAutomat = 0;
 
 
-//#define DEVBABY1 // DEVBABY1 board
-//#define ASP     // ASP board
-#define DEVBIG	// Big (first) DEV board
-//#define ESPBOX1	// controller lumini spate
-//#define ESPBOX2	// controller lumini fata
+
 
 
 #define TESTE
@@ -3937,100 +3940,7 @@ void setup()
 
   	  serverBegin();
 
-
-#ifdef DEVBABY1x // we use multiple connection options for this devboard
-  if (connectedIP != 1023518912) // which means 192.168.1.61 - for TPLink
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef DEVBABY1 // we use multiple connection options for this devboard
-  if (connectedIP != 1023519168) // which means 192.169.1.61 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ASPx
-  if (connectedIP != 1040296128) // which means 192.168.1.62
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ASP
-  if (connectedIP != 1040296384) // which means 192.169.1.62 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef DEVBIG
-  if (connectedIP != 1006741952) // which means 192.169.1.60
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    //ESP.restart();												// TBD: to uncomment and move this entire section elsewhere
-  }
-#endif
-
-#ifdef ESPBOX1x
-  if (connectedIP != 1090627776) // which means 192.168.1.65
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ESPBOX1
-  if (connectedIP != 1090628032) // which means 192.169.1.65 - for Kaon
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-#ifdef ESPBOX2
-  if (connectedIP != 1107404992) // which means 192.168.1.66
-  {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
-  }
-#endif
-
-  // Start of OTA configuration
-#ifdef DEVBABY1
-  ArduinoOTA.setHostname("DEVBABY1");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ASP
-  ArduinoOTA.setHostname("ASP");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef DEVBIG
-  ArduinoOTA.setHostname("DEVBIG");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ESPBOX1
-  ArduinoOTA.setHostname("ESPBOX1");
-  ArduinoOTA.setPassword("ototo");
-#endif
-#ifdef ESPBOX2
-  ArduinoOTA.setHostname("ESPBOX2");
-  ArduinoOTA.setPassword("ototo");
-#endif
+  	  checkCorrectIPObtained();
 
 
   	  OTASetup();
