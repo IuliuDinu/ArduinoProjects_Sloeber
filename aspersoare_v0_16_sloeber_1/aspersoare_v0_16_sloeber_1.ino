@@ -135,6 +135,7 @@ byte menuInProgress = 0; // refers to any menu, when it's actually running
 byte lastMenuSuccessfullyEnded = 0; // gets the value of the last menu
 
 bool timeClientSetupWasPerformed = 0;
+bool wifiConnectionSucceeded = 0;
 
 
 // Will keep board startup time
@@ -280,7 +281,7 @@ void connectInit() {
 }
 
 void connectCheck() {
-   digitalWrite(D6, HIGH);
+	blinkAllLeds(6,10);
    Serial.print(millis());
    Serial.println(F(": connectCheck."));
 
@@ -290,6 +291,36 @@ void connectCheck() {
     Serial.println(WiFi.localIP());
     Serial.println(F(": tConnect.disable() will NOT follow"));
     blinkOneLed(REL_3, 5, 2);
+
+    if (FALSE == wifiConnectionSucceeded)
+    {
+    	Serial.println("connectCheck(): checkCorrectIPObtained()");
+    	blinkOneLed(REL_1, 1, 2);
+    	checkCorrectIPObtained();	// takes around 1ms
+    	blinkOneLed(REL_1, 1, 2);
+
+    	Serial.println("connectCheck(): performTimeClientSetup()");
+    	blinkOneLed(REL_2, 1, 2);
+    	performTimeClientSetup();	// takes around 0.2s
+    	blinkOneLed(REL_2, 1, 2);
+
+    	Serial.println("connectCheck(): updateWifiConnectionCounter()");
+    	blinkOneLed(REL_3, 1, 2);
+    	updateWifiConnectionCounter();	// takes around 0.327s
+    	blinkOneLed(REL_3, 1, 2);
+
+    	Serial.println("connectCheck(): serverBegin()");
+    	blinkOneLed(REL_2, 1, 2);
+    	serverBegin();					// takes around 2ms
+    	blinkOneLed(REL_2, 1, 2);
+
+    	Serial.println("connectCheck(): OTASetup()");
+    	blinkOneLed(REL_1, 1, 2);
+    	OTASetup();						// takes around 4ms
+    	blinkOneLed(REL_1, 1, 2);
+
+    	wifiConnectionSucceeded = 1;
+    }
 
     tConnect.setInterval(5000);
 
@@ -323,7 +354,7 @@ void connectCheck() {
 
     }
   }
-   digitalWrite(D6, LOW);
+  blinkAllLeds(6,10);
 }
 
 void mainCallback() {
@@ -333,7 +364,7 @@ void mainCallback() {
 	blinkOneLed(REL_3, 1, 1);
   if (!WiFi.isConnected())
   {
-    Serial.println("MAIN: WiFi was disconnected");
+    Serial.println("MAIN: WiFi is not connected");
     if (wifiDisconnectedLoopCounter > MAX_WIFI_DISC_LOOP_COUNTER)
       {
         //save EEPROM REL values - neah, already done when set on/off
@@ -3918,32 +3949,33 @@ void setup()
 //  Serial.println("");
 //  Serial.println("WiFi connected");
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
-#ifdef DEVBABY1
-	   digitalWrite(REL_1, LOW);
-	   digitalWrite(REL_2, HIGH);
-	   digitalWrite(REL_3, LOW);
-#endif
-
-	   performTimeClientSetup();
-
-	   updateWifiConnectionCounter();
-
-
-        delay(100);
-  }
-  else
-  {
-	  Serial.println("WIFI != CONNECTED, pula mea");
-  }
-
-  	  serverBegin();
-
-  	  checkCorrectIPObtained();
-
-
-  	  OTASetup();
+//  if (WiFi.status() == WL_CONNECTED)
+//  {
+//#ifdef DEVBABY1
+//	   digitalWrite(REL_1, LOW);
+//	   digitalWrite(REL_2, HIGH);
+//	   digitalWrite(REL_3, LOW);
+//#endif
+//
+//	   //Serial.println("SETUP: performTimeClientSetup()");
+//	   //performTimeClientSetup();
+//
+////	   updateWifiConnectionCounter();
+//
+//
+//        delay(100);
+//  }
+//  else
+//  {
+//	  Serial.println("WIFI != CONNECTED, pula mea");
+//  }
+//
+////  	  serverBegin();
+//
+////  	  checkCorrectIPObtained();
+//
+//
+////  	  OTASetup();
 
   	  updateResetCounter();
 
@@ -3970,7 +4002,7 @@ void setup()
   //load EEPROM values related to timers scheduled daily or one-time
   loadTimersDataFromEEPROM();
 
-  timestampForNextNTPSync = millis();
+//  timestampForNextNTPSync = millis();
   blinkAllLeds(3,10);
 
   tConnect.setInterval(1000);

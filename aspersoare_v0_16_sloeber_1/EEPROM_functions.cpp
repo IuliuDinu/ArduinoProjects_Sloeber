@@ -743,11 +743,11 @@ void updateWifiConnectionCounter()
     delay(100);
     if (EEPROM.commit())
     {
-      Serial.println("EEPROM has been updated.");
+      Serial.println("WifiConnectionCounter EEPROM has been updated.");
     }
     else
     {
-      Serial.println("EEPROM commit failed.");
+      Serial.println("WifiConnectionCounter EEPROM commit failed.");
     }
 }
 
@@ -762,10 +762,10 @@ void updateResetCounter()
   delay(100);
   if (EEPROM.commit())
   {
-	Serial.println("EEPROM has been updated.");
+	Serial.println("Reset Counter: EEPROM has been updated.");
   }
   else
   {
-	Serial.println("EEPROM commit failed.");
+	Serial.println("Reset Counter: EEPROM commit failed.");
   }
 }

@@ -18,7 +18,7 @@ void performTimeClientSetup()
 
     if (syncSuccess)
     {
-      Serial.println("Setup: timeClientUpdateSuccess");
+      Serial.println("performTimeClientSetup: timeClientUpdateSuccess");
       formattedStartupTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
       Serial.print("Formatted START-UP Time: ");
       Serial.println(formattedStartupTime);
