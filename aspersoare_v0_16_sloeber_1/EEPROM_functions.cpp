@@ -731,3 +731,22 @@ void saveLastMenuSuccessfullyEnded_Parameters()
 	setEeprom_lastMenuSuccessfullyEnded_Min(byte(gs_last_successful_menu_run.m));
 	setEeprom_lastMenuSuccessfullyEnded_Sec(byte(gs_last_successful_menu_run.s));
 }
+
+void updateWifiConnectionCounter()
+{
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used
+    delay(100);
+    nbOfWifiConnectedTimes = EEPROM.read(EEPROM_ADDR_WIFI_CONN_COUNTER);
+    nbOfWifiConnectedTimes++;
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_WIFI_CONN_COUNTER, nbOfWifiConnectedTimes);
+    delay(100);
+    if (EEPROM.commit())
+    {
+      Serial.println("EEPROM has been updated.");
+    }
+    else
+    {
+      Serial.println("EEPROM commit failed.");
+    }
+}

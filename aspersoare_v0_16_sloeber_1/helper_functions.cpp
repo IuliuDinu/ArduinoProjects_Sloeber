@@ -76,3 +76,17 @@ void get24HMaxMillis()
     gul_max24hMillis -= (multiplier*ONE_DAY_IN_MILISECONDS);
   }
 }
+
+void serverBegin()
+{
+   server.begin();
+   Serial.println("Server started");
+   // Print the IP address
+   Serial.print("Use this URL to connect: ");
+   Serial.print("http://");
+   Serial.println(WiFi.localIP());
+   connectedIP = WiFi.localIP();
+   Serial.print("int connectedIP = ");
+   Serial.println(connectedIP);
+   Serial.println(IPAddress(connectedIP));
+}

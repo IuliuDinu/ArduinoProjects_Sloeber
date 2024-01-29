@@ -3925,39 +3925,18 @@ void setup()
 
 	   performTimeClientSetup();
 
+	   updateWifiConnectionCounter();
 
-      EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used
-      delay(100);
-      nbOfWifiConnectedTimes = EEPROM.read(EEPROM_ADDR_WIFI_CONN_COUNTER);
-      nbOfWifiConnectedTimes++;
-      delay(100);
-      EEPROM.write(EEPROM_ADDR_WIFI_CONN_COUNTER, nbOfWifiConnectedTimes);
-      delay(100);
-      if (EEPROM.commit())
-      {
-        Serial.println("EEPROM has been updated.");
-      }
-      else
-      {
-        Serial.println("EEPROM commit failed.");
-      }
+
         delay(100);
-    }
-    else
-    {
-      Serial.println("WIFI != CONNECTED, pula mea");
-    }
+  }
+  else
+  {
+	  Serial.println("WIFI != CONNECTED, pula mea");
+  }
 
-   server.begin();
-  Serial.println("Server started");
-  // Print the IP address
-  Serial.print("Use this URL to connect: ");
-  Serial.print("http://");
-  Serial.println(WiFi.localIP());
-  connectedIP = WiFi.localIP();
-  Serial.print("int connectedIP = ");
-  Serial.println(connectedIP);
-  Serial.println(IPAddress(connectedIP));
+  	  serverBegin();
+
 
 #ifdef DEVBABY1x // we use multiple connection options for this devboard
   if (connectedIP != 1023518912) // which means 192.168.1.61 - for TPLink
