@@ -17,6 +17,7 @@ extern byte lastMenuSuccessfullyEnded;
 extern clock_and_date_type gs_last_successful_menu_run;
 
 extern byte nbOfWifiConnectedTimes;
+extern byte nbofresets;
 
 
 byte eepromInitParticularByte(byte address);
@@ -69,3 +70,4 @@ void loadTimersDataFromEEPROM();
 void saveLastMenuSuccessfullyEnded_Parameters();
 
 void updateWifiConnectionCounter();
+void updateResetCounter();

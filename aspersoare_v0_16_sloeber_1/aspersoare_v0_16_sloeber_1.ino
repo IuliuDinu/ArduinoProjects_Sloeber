@@ -3945,24 +3945,10 @@ void setup()
 
   	  OTASetup();
 
+  	  updateResetCounter();
 
 
-  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte
-  delay(100);
-  nbofresets = EEPROM.read(EEPROM_ADDR_RST_COUNTER);
-  nbofresets++;
-  delay(100);
-  EEPROM.write(EEPROM_ADDR_RST_COUNTER, nbofresets);
-  delay(100);
-  if (EEPROM.commit())
-  {
-    Serial.println("EEPROM has been updated.");
-  }
-  else
-  {
-    Serial.println("EEPROM commit failed.");
-  }
-  delay(100);
+  	  delay(100);
 
   //load EEPROM REL values
 #if defined (ESPBOX1) || defined (ESPBOX2)
