@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
 #include "gpio_defs.h"
 #include "specific_typedefs.h"
 #include "time_defs.h"
@@ -18,3 +19,4 @@ void convertFromSecToStructHMS(unsigned long ul_sec, clock_type *hms_var);
 void get24HMaxMillis();
 void resetAllLoads();
 void serverBegin();
+void OTASetup();

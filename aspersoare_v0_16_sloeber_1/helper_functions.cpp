@@ -90,3 +90,36 @@ void serverBegin()
    Serial.println(connectedIP);
    Serial.println(IPAddress(connectedIP));
 }
+
+void OTASetup()
+{
+
+  ArduinoOTA.onStart([]()
+  {
+	Serial.println("OTA_Start");
+  });
+
+  ArduinoOTA.onEnd([]()
+  {
+	Serial.println("\nOTA_End");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total)
+  {
+	  Serial.printf("OTA_Progress: %u%%\r", (progress / (total / 100)));
+  });
+
+  ArduinoOTA.onError([](ota_error_t error)
+  {
+	Serial.printf("OTA_Error[%u]: ", error);
+	if (error == OTA_AUTH_ERROR) Serial.println("OTA_Auth Failed");
+	else if (error == OTA_BEGIN_ERROR) Serial.println("OTA_Begin Failed");
+	else if (error == OTA_CONNECT_ERROR) Serial.println("OTA_Connect Failed");
+	else if (error == OTA_RECEIVE_ERROR) Serial.println("OTA_Receive Failed");
+	else if (error == OTA_END_ERROR) Serial.println("OTA_End Failed");
+  });
+
+  ArduinoOTA.begin();
+  Serial.println("OTA ready");
+  // End of OTA configuration
+}
