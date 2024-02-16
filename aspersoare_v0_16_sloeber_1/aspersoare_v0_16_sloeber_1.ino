@@ -285,14 +285,15 @@ void connectCheck() {
    Serial.print(millis());
    Serial.println(F(": connectCheck."));
 
-  if (WiFi.status() == WL_CONNECTED) {                // Connection established
+  if (WiFi.status() == WL_CONNECTED)
+  {                // Connection established
     Serial.print(millis());
     Serial.print(F(": Connected to AP. Local ip: "));
     Serial.println(WiFi.localIP());
     Serial.println(F(": tConnect.disable() will NOT follow"));
     blinkOneLed(REL_3, 5, 2);
 
-    if (FALSE == wifiConnectionSucceeded)
+    if ((FALSE == wifiConnectionSucceeded) && (wifiDisconnectedCounter == 0))
     {
     	Serial.println("connectCheck(): checkCorrectIPObtained()");
     	blinkOneLed(REL_1, 1, 2);
@@ -319,7 +320,12 @@ void connectCheck() {
     	OTASetup();						// takes around 4ms
     	blinkOneLed(REL_1, 1, 2);
 
-    	wifiConnectionSucceeded = 1;
+    	wifiConnectionSucceeded = TRUE;
+    }
+
+    if (FALSE == wifiConnectionSucceeded)
+    {
+    	wifiConnectionSucceeded = TRUE;
     }
 
     tConnect.setInterval(5000);
@@ -328,11 +334,19 @@ void connectCheck() {
   }
   else {
 
+	  if (TRUE == wifiConnectionSucceeded)
+	  {
+		  wifiDisconnectedCounter++;
+		  wifiConnectionSucceeded = FALSE;
+	  }
+
     tConnect.setInterval(1000);
 
-    if (tConnect.getRunCounter() % 10 == 0) {          // re-request connection every 10 seconds
+    if (tConnect.getRunCounter() % 10 == 0)
+    {          // re-request connection every 10 seconds
 
-      Serial.print(millis());
+    	blinkOneLed(REL_3, 20, 2);
+    	Serial.print(millis());
       Serial.println(F(": Re-requesting connection to AP..."));
 
       WiFi.disconnect(true);
@@ -372,14 +386,14 @@ void mainCallback() {
       }
     wifiDisconnectedLoopCounter++;
   }
-  else
-  {
-    if (wifiDisconnectedLoopCounter)
-      {
-        wifiDisconnectedLoopCounter = 0;
-        wifiDisconnectedCounter++;
-      }
-  }
+//  else
+//  {
+//    if ((wifiDisconnectedLoopCounter > 0) && (wifiDisconnectedLoopCounter < MAX_WIFI_DISC_LOOP_COUNTER))
+//      {
+//        //wifiDisconnectedLoopCounter = 0;
+//			//wifiDisconnectedCounter++;
+//      }
+//  }
 
   updateLocalTimersInMainLoop();
 
@@ -2266,8 +2280,10 @@ void mainCallback() {
            client.print("connectedIP: ");
            client.println(IPAddress(connectedIP));
            client.println(connectedIP);
-           client.print("WifiConnectionLosses: ");
+           client.print("wifiDisconnectedCounter: ");
            client.println(wifiDisconnectedCounter);
+           client.print("wifiDisconnectedLoopCounter: ");
+           client.println(wifiDisconnectedLoopCounter);
 #ifdef ESPBOX1
            client.print("rel1_status: (backup)");
            client.println(rel1_status);
