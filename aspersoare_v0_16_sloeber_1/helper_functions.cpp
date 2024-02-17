@@ -2,6 +2,7 @@
 
 void blinkAllLeds(byte nbOfTimes, byte period)
 {
+#ifdef LEDS_DEBUG_MODE
 	for (int i=0; i<nbOfTimes; i++)
 	{
 		digitalWrite(REL_1, HIGH);
@@ -17,10 +18,12 @@ void blinkAllLeds(byte nbOfTimes, byte period)
 		digitalWrite(REL_3, LOW);
 		delay(period/2);
 	}
+#endif
 }
 
 void blinkOneLed(byte load, byte nbOfTimes, byte period)
 {
+#ifdef LEDS_DEBUG_MODE
 	for (int i=0; i<nbOfTimes; i++)
 	{
 		digitalWrite(load, HIGH);
@@ -28,6 +31,7 @@ void blinkOneLed(byte load, byte nbOfTimes, byte period)
 		digitalWrite(load, LOW);
 		delay(period/2);
 	}
+#endif
 }
 
 void resetAllLoads()

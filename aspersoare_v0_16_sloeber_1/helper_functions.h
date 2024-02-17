@@ -4,6 +4,9 @@
 #include "gpio_defs.h"
 #include "specific_typedefs.h"
 #include "time_defs.h"
+#include "general_defs.h"
+#include "platform_defs.h"
+
 
 extern unsigned long gul_max24hMillis;
 extern byte rel1_status;

@@ -1,13 +1,9 @@
 #define _TASK_SLEEP_ON_IDLE_RUN
 #define _TASK_STATUS_REQUEST
 
-// Platform selection
-//#define DEVBABY1 // DEVBABY1 board
-//#define ASP     // ASP board
-#define DEVBIG	// Big (first) DEV board
-//#define ESPBOX1	// controller lumini spate
-//#define ESPBOX2	// controller lumini fata
 
+#include "general_defs.h"
+#include "platform_defs.h" // Platform selection
 #include "Arduino.h"
 #include <ESP8266WiFi.h>
 //#include <ESP8266WiFiMulti.h>
@@ -179,7 +175,6 @@ clock_and_date_type gs_last_successful_menu_run = {0};
 clock_and_date_type gs_clockdate_test = {0};
 #endif
 
-//extern void blinkAllLeds(byte nbOfTimes, byte period);
 
 void updateLocalTime()
 {
@@ -262,9 +257,11 @@ void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply i
 }
 
 void connectInit() {
+
 	blinkAllLeds(4,10);
 
 	blinkOneLed(REL_2, 1, 2);
+
 	Serial.print(millis());
 	Serial.println(F(": connectInit."));
 	Serial.println(F("WiFi parameters: "));
@@ -277,11 +274,14 @@ void connectInit() {
 	yield();
 
 	tConnect.yield(&connectCheck);            // This will pass control back to Scheduler and then continue with connection checking
+
 	blinkOneLed(REL_2, 1, 2);
+
 }
 
 void connectCheck() {
 	blinkAllLeds(6,10);
+
    Serial.print(millis());
    Serial.println(F(": connectCheck."));
 
