@@ -269,7 +269,12 @@ void connectInit() {
 	Serial.print(F("PWD : ")); Serial.println(password);
 
 	WiFi.mode(WIFI_STA);
+#ifdef DEVBIG
 	WiFi.hostname("DEV_MARE");
+#endif
+#ifdef ESPBOX2
+	WiFi.hostname("ESPBOX2");
+#endif
 	WiFi.begin(ssid, password);
 	yield();
 
@@ -293,7 +298,7 @@ void connectCheck() {
     Serial.println(F(": tConnect.disable() will NOT follow"));
     blinkOneLed(REL_3, 5, 2);
 
-    if ((FALSE == wifiConnectionSucceeded) && (wifiDisconnectedCounter == 0))
+    if ((FALSE == wifiConnectionSucceeded) && (wifiDisconnectedCounter == 0)) // to run this sequence only once
     {
     	Serial.println("connectCheck(): checkCorrectIPObtained()");
     	blinkOneLed(REL_1, 1, 2);
@@ -338,6 +343,7 @@ void connectCheck() {
 	  {
 		  wifiDisconnectedCounter++;
 		  wifiConnectionSucceeded = FALSE;
+		  wifiDisconnectedLoopCounter = 0;
 	  }
 
     tConnect.setInterval(1000);
@@ -351,7 +357,12 @@ void connectCheck() {
 
       WiFi.disconnect(true);
       yield();                                        // This is an esp8266 standard yield to allow linux wifi stack run
-      WiFi.hostname("DEV_MARE");
+#ifdef DEVBIG
+	WiFi.hostname("DEV_MARE");
+#endif
+#ifdef ESPBOX2
+	WiFi.hostname("ESPBOX2");
+#endif
       WiFi.mode(WIFI_STA);
       WiFi.begin(ssid, password);
       yield();                                        // This is an esp8266 standard yield to allow linux wifi stack run
@@ -396,10 +407,10 @@ void mainCallback() {
 //  }
 
   updateLocalTimersInMainLoop();
-
+#ifdef ASP
   // Handlers for 1-time scheduled program, one or multiple loads (but in order REL_1, REL_2, REL_3):
   // **********************************************************************************************
-  if (timerScheduledOneTime != FALSE)
+  if (timerScheduledOneTime != FALSE)	// end  at line 1084
   {	Serial.println("timerScheduledOneTime != FALSE");
 
 	if (menuNumberScheduledOneTime == 35)	// Handler for menu Nb 35 (TEST MENU)
@@ -1071,8 +1082,9 @@ void mainCallback() {
 
 	//if (menuNumberScheduledOneTime == XX)	// Handler for menu Nb XX
   } 	// End of handlers for 1-time scheduled program
+  	  	 // Begins at line 413
   	  	 // *******************************************************************************
-
+#endif // ASP
 
   // Handlers for 1-time scheduled program from X to Y time, only one load programs:
 /*  if (timerScheduledOneTimeOneLoadOnly != FALSE)
@@ -1115,10 +1127,10 @@ void mainCallback() {
 */
 
 
-
+#ifdef ASP
   // Handlers for daily scheduled program, one or multiple loads (but in order REL_1, REL_2, REL_3):
   // **********************************************************************************************
-  if (timerScheduledDaily != FALSE)
+  if (timerScheduledDaily != FALSE)	// ends at line 1496
   {	Serial.println("timerScheduledDaily != FALSE");
 
   	  if (menuNumberScheduledDaily == 30)	// Handler for menu Nb 30
@@ -1481,9 +1493,11 @@ void mainCallback() {
 
   }	// End of handlers for daily scheduled programs
  	 // *******************************************************************************************
-
+  	  // Begins at line 1133
+#endif // ASP
   // TBD - will potentially be abandoned since this can be also covered by daily multiple loads handler
   // Handlers for daily scheduled program from X to Y time, only one load programs:
+
 
   if (timerScheduledDailyOneLoadOnly != FALSE)
   {	//Serial.println("timerScheduledDailyOneLoadOnly != FALSE");
@@ -1508,24 +1522,26 @@ void mainCallback() {
 				rel2_status = loadsScheduledDailyOneLoadOnly[1];
 				//rel3_status = loadsScheduledDailyOneLoadOnly[2];
 
-				if (setEepromRel_2(rel2_status))								// TBD NEXT: to drop using load status eeprom save when in this type of timer mode
-				{
-					relStatusSaveToEepromFailed = FALSE;
-					digitalWrite(REL_2, rel2_status);
-					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = TRUE;
-					getDateFromNTPToStruct(gs_last_successful_menu_run);
-					saveLastMenuSuccessfullyEnded_Parameters();
-				}
-				else
-				{
-					relStatusSaveToEepromFailed = TRUE;
-					timerScheduledDailyOneLoadOnlyStarted = FALSE;
-				}
+//				if (setEepromRel_2(rel2_status))								// TBD NEXT: to drop using load status eeprom save when in this type of timer mode
+//				{
+//					relStatusSaveToEepromFailed = FALSE;
+//					digitalWrite(REL_2, rel2_status);
+//					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = TRUE;
+//					getDateFromNTPToStruct(gs_last_successful_menu_run);
+//					saveLastMenuSuccessfullyEnded_Parameters();
+//				}
+//				else
+//				{
+//					relStatusSaveToEepromFailed = TRUE;
+//					timerScheduledDailyOneLoadOnlyStarted = FALSE;
+//				}
 
 				//digitalWrite(REL_1, rel1_status);
-				//digitalWrite(REL_2, rel2_status);
+				digitalWrite(REL_2, rel2_status);
 				//digitalWrite(REL_3, rel3_status);
-				//timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = TRUE;
+				timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = TRUE;
+				getDateFromNTPToStruct(gs_last_successful_menu_run);
+				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
 			if (localTime >= MENIU_50_LOCALTIME_START + MENIU_50_DURATION - 15)
@@ -1535,23 +1551,23 @@ void mainCallback() {
 				rel2_status = LOW;
 				//rel3_status = LOW;
 				//digitalWrite(REL_1, rel1_status);
-				//digitalWrite(REL_2, rel2_status);
+				digitalWrite(REL_2, rel2_status);
 				//digitalWrite(REL_3, rel3_status);
-				//timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
+				timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
 
-				if (setEepromRel_2(rel2_status))
-				{
-					relStatusSaveToEepromFailed = FALSE;
-					digitalWrite(REL_2, rel2_status);
-					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
-				}
-				else
-				{
-					setEepromRel_2(rel2_status); // retry
-					relStatusSaveToEepromFailed = FALSE;
-					digitalWrite(REL_2, rel2_status);
-					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
-				}
+//				if (setEepromRel_2(rel2_status))
+//				{
+//					relStatusSaveToEepromFailed = FALSE;
+//					digitalWrite(REL_2, rel2_status);
+//					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
+//				}
+//				else
+//				{
+//					setEepromRel_2(rel2_status); // retry
+//					relStatusSaveToEepromFailed = FALSE;
+//					digitalWrite(REL_2, rel2_status);
+//					timerScheduledDailyOneLoadOnlyLoadHasBeenSwitchedOn = FALSE;
+//				}
 
 				getDateFromNTPToStruct(gs_last_successful_menu_run);
 				saveLastMenuSuccessfullyEnded_Parameters();
@@ -1561,7 +1577,7 @@ void mainCallback() {
 
 		}
 	}		// End of handler for menu Nb 50
-#endif
+#endif // ESPBOX1
 
 	//if (menuNumberScheduledDailyOneLoadOnly == XX)	// Handler for menu Nb XX
   } 	// End handlers of for daily scheduled program from X to Y time, only one load programs:
@@ -1794,6 +1810,7 @@ void mainCallback() {
                 else
                   {
                 	relStatusSaveToEepromFailed = TRUE;
+                	rel1_status = LOW;
                 	client.println("Failed to save EEPROM status./nLoad will not start.");
                   }
 #endif
@@ -1873,6 +1890,7 @@ void mainCallback() {
                 else
                   {
                 	relStatusSaveToEepromFailed = TRUE;
+                	rel2_status = LOW;
                 	client.println("Failed to save EEPROM status./nLoad will not start.");
                   }
 #endif
@@ -1951,6 +1969,7 @@ void mainCallback() {
                 else
                 {
                 	relStatusSaveToEepromFailed = TRUE;
+                	rel3_status = LOW;
                 	client.println("Failed to save EEPROM status./nLoad will not start.");
                 }
 #endif
@@ -2059,6 +2078,9 @@ void mainCallback() {
         {
         	client.println("*********************");
         	client.println("Versiune: aspersoare_v0_15_sloeber_1");
+        	client.println("Last flash: 17-Feb-2024");
+        	client.println("Repo: aspersoare_v0_16_sloeber_for_ASP_module_split");
+        	client.println("Commit ID: XXXXX");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -2071,6 +2093,8 @@ void mainCallback() {
         	client.println("checktime - apeleaza NTP");
         	client.println("meniu_40 - Lampa spate pornita zilnic de la 21:00 la 23:59");
         	client.println("m40_stop - ANULARE PROGRAM: Lampa spate pornita zilnic de la 21:00 la 23:59");
+        	client.println("meniu_50 - Lampa spate pornita zilnic de la 17:45 la 23:59");
+        	client.println("m50_stop - ANULARE PROGRAM: Lampa spate pornita zilnic de la 17:45 la 23:59");
         	client.println("boardTime - [sec] timp dupa reset");
         	client.println("localtime - experimental");
         	client.println("SystemRestart (buton RESET) - Reset sistem");
@@ -2326,7 +2350,7 @@ void mainCallback() {
         	client.print("boardMillis: ");
         	client.println(millis());
 		}
-
+// list of menu calls ends at line 3703
         if (request == "meniu_1")
         {
         	// O tura aspersor spate 15 min
@@ -3684,6 +3708,7 @@ void mainCallback() {
 				printThisProgramIsNotScheduled_2(client);
 			}
 		}
+// list of menu calls begins at line 2345
 
         /*if (request.indexOf("meniu_30") != -1)
         {
@@ -3912,7 +3937,11 @@ void setup()
 #ifdef ESPBOX1
    timerScheduledDailyOneLoadOnly = TRUE;
    menuNumberScheduledDailyOneLoadOnly = 50;
-   loadsScheduledDailyOneLoadOnly[1] = 1;
+   loadsScheduledDailyOneLoadOnly[1] = 1; // REL2 = lampa spate
+#endif
+
+#ifdef ESPBOX2
+   setEepromRel_3(1);
 #endif
 
    Serial.begin(115200);
@@ -3928,12 +3957,6 @@ void setup()
 
    relStatusSaveToEepromFailed = 0;
 
-#if defined (ESPBOX1) || defined (ESPBOX2) || defined (DEVBIG)
-   // in case EEPROM_GET_REL_STATE_RETURN_ERROR is returned, %2 will be 0
-   digitalWrite(REL_1, (getEepromRel_1()%2));
-   digitalWrite(REL_2, (getEepromRel_2()%2));
-   digitalWrite(REL_3, (getEepromRel_3()%2));
-#endif
 
 #ifdef DEVBABY1
    digitalWrite(REL_1, HIGH);
@@ -3945,7 +3968,7 @@ void setup()
   // Connect to WiFi
   Serial.println();
   Serial.println();
-  Serial.println("SETUP: passed connection connectInit() function");
+  Serial.println("SETUP: passed connection to connectInit() function");
 //  Serial.print("Connecting to ");
 //  Serial.println(ssid);
 //  Serial.println(" ");
@@ -3999,10 +4022,10 @@ void setup()
   	  delay(100);
 
   //load EEPROM REL values
-#if defined (ESPBOX1) || defined (ESPBOX2)
-  rel1_status = getEepromRel_1();
-  rel2_status = getEepromRel_2();
-  rel3_status = getEepromRel_3();
+#if defined (ESPBOX1) || defined (ESPBOX2) || defined (DEVBIG)
+  rel1_status = (getEepromRel_1()%2);
+  rel2_status = (getEepromRel_2()%2);
+  rel3_status = (getEepromRel_3()%2);
   digitalWrite(REL_1, rel1_status);
   digitalWrite(REL_2, rel2_status);
   digitalWrite(REL_3, rel3_status);

@@ -70,5 +70,7 @@
 #define MENIU_36_DURATION				300
 #define MENIU_40_LOCALTIME_START		75600
 #define MENIU_40_LOCALTIME_END			86340
-#define MENIU_50_LOCALTIME_START		59400
-#define MENIU_50_DURATION				27000
+//#define MENIU_50_LOCALTIME_START		59400	//lampa spate - noiembrie-februarie - 16:30-00:00
+//#define MENIU_50_DURATION				27000
+#define MENIU_50_LOCALTIME_START		63900	//lampa spate - februarie - 30 martie - 17:15-00:00
+#define MENIU_50_DURATION				22500
