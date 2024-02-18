@@ -4,6 +4,8 @@
 #include "EEPROM_defs.h"
 #include "logical_defs.h"
 #include "specific_typedefs.h"
+#include "general_defs.h"
+#include "platform_defs.h"
 
 extern bool timerScheduledOneTime;
 extern bool timerScheduledDaily;

@@ -209,8 +209,10 @@ void checkCorrectIPObtained()
 #ifdef ESPBOX1
   if (connectedIP != 1090628032) // which means 192.169.1.65 - for Kaon
   {
-    Serial.println("Wrong IP, ESP will reset");
+    Serial.println("ESPBOX1: Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
+    Serial.print("ESPBOX1: connectedIP = ");
+    Serial.println(connectedIP);
     ESP.restart();
   }
 #endif
@@ -225,11 +227,11 @@ void checkCorrectIPObtained()
 #endif
 
 #ifdef ESPBOX2
-  if (connectedIP != 1107404992) // which means 192.169.1.66 - for Kaon
+  if (connectedIP != 1107405248) // which means 192.169.1.66 - for Kaon
   {
     Serial.println("Wrong IP, ESP will reset");
     Serial.println("!!!!!!!!!!!!!");
-    //ESP.restart();
+    ESP.restart();
   }
 #endif
 }

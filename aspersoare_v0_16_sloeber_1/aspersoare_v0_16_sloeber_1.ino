@@ -78,7 +78,7 @@ const char* password = "A1b2C3d4";
 #endif
 
 #ifdef ESPBOX2
-const char* ssid = "Gorlitze";
+const char* ssid = "Gorlitze_etaj";
 const char* password = "A1b2C3d4";
 #endif
 
@@ -272,6 +272,9 @@ void connectInit() {
 #ifdef DEVBIG
 	WiFi.hostname("DEV_MARE");
 #endif
+#ifdef ESPBOX1
+	WiFi.hostname("ESPBOX1");
+#endif
 #ifdef ESPBOX2
 	WiFi.hostname("ESPBOX2");
 #endif
@@ -300,11 +303,6 @@ void connectCheck() {
 
     if ((FALSE == wifiConnectionSucceeded) && (wifiDisconnectedCounter == 0)) // to run this sequence only once
     {
-    	Serial.println("connectCheck(): checkCorrectIPObtained()");
-    	blinkOneLed(REL_1, 1, 2);
-    	checkCorrectIPObtained();	// takes around 1ms
-    	blinkOneLed(REL_1, 1, 2);
-
     	Serial.println("connectCheck(): performTimeClientSetup()");
     	blinkOneLed(REL_2, 1, 2);
     	performTimeClientSetup();	// takes around 0.2s
@@ -323,6 +321,11 @@ void connectCheck() {
     	Serial.println("connectCheck(): OTASetup()");
     	blinkOneLed(REL_1, 1, 2);
     	OTASetup();						// takes around 4ms
+    	blinkOneLed(REL_1, 1, 2);
+
+    	Serial.println("connectCheck(): checkCorrectIPObtained()");
+    	blinkOneLed(REL_1, 1, 2);
+    	checkCorrectIPObtained();	// takes around 1ms
     	blinkOneLed(REL_1, 1, 2);
 
     	wifiConnectionSucceeded = TRUE;
@@ -359,6 +362,9 @@ void connectCheck() {
       yield();                                        // This is an esp8266 standard yield to allow linux wifi stack run
 #ifdef DEVBIG
 	WiFi.hostname("DEV_MARE");
+#endif
+#ifdef ESPBOX1
+	WiFi.hostname("ESPBOX1");
 #endif
 #ifdef ESPBOX2
 	WiFi.hostname("ESPBOX2");
@@ -2080,7 +2086,7 @@ void mainCallback() {
         	client.println("Versiune: aspersoare_v0_15_sloeber_1");
         	client.println("Last flash: 17-Feb-2024");
         	client.println("Repo: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: XXXXX");
+        	client.println("Commit ID: a67e3d2");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
