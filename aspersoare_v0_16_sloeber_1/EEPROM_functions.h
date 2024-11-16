@@ -25,7 +25,7 @@ extern byte nbofresets;
 byte eepromInitParticularByte(byte address);
 byte eepromInitParticularBytesFromTo(byte address_from, byte address_to);
 void eepromEraseAllDefinedBytes();
-void eepromEraseAddr01();
+void eepromEraseResetAndWifiDiscCounters();
 void eepromEraseRelLastState();
 byte setEepromRel_1(byte state);
 byte setEepromRel_2(byte state);

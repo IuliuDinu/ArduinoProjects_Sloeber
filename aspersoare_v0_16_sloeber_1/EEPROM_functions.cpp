@@ -42,13 +42,13 @@ void eepromEraseAllDefinedBytes()
     delay(100);
 }
 
-void eepromEraseAddr01()
+void eepromEraseResetAndWifiDiscCounters()
 {
     EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //2 bytes used
     delay(100);
-    EEPROM.write(0, 0);
+    EEPROM.write(EEPROM_ADDR_RST_COUNTER, 0);
     delay(100);
-    EEPROM.write(1, 0);
+    EEPROM.write(EEPROM_ADDR_WIFI_CONN_COUNTER, 0);
     delay(100);
     EEPROM.commit();
     delay(100);
