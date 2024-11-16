@@ -2235,7 +2235,17 @@ void mainCallback() {
         	client.println("print_eeprom - Afiseaza toate valorile din EEPROM");
 #endif
 
+#ifdef DEVBIG
+           	client.println("Placa devzoltare 'DEVBIG'");
+			client.println("Comenzi disponibile:");
+        	client.println("checktime - apeleaza NTP");
+        	client.println("boardTime - [sec] timp dupa reset");
+        	client.println("localtime - experimental");
+        	client.println("get_date3 - afiseaza data");
+        	client.println("SystemRestart (buton RESET) - Reset sistem");
+#endif
 
+        	client.println("clearRstAndWifiCounters - Reseteaza contoare Reset si deconectari Wifi");
         	client.println("****************************");
 
         }
@@ -3889,6 +3899,12 @@ void mainCallback() {
 		}
 #endif
 
+        if (request == "clearRstAndWifiCounters")
+		{
+			client.println("Clearing Reset counter and WiFi Disconnection counters...");
+			eepromEraseResetAndWifiDiscCounters();
+			client.println("Counters have been reset.");
+		}
 
 
          new_client = 0;
