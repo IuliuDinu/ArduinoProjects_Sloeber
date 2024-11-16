@@ -63,3 +63,4 @@ timers_status
 print_eeprom
 get_date2
 get_date3
+clearRstAndWifiCounters
