@@ -1,6 +1,6 @@
 #include "helper_functions.h"
 
-void blinkAllLeds(byte nbOfTimes, byte period)
+void blinkAllLeds_debugMode(byte nbOfTimes, byte period)
 {
 #ifdef LEDS_DEBUG_MODE
 	for (int i=0; i<nbOfTimes; i++)
@@ -21,7 +21,7 @@ void blinkAllLeds(byte nbOfTimes, byte period)
 #endif
 }
 
-void blinkOneLed(byte load, byte nbOfTimes, byte period)
+void blinkOneLed_debugMode(byte load, byte nbOfTimes, byte period)
 {
 #ifdef LEDS_DEBUG_MODE
 	for (int i=0; i<nbOfTimes; i++)
@@ -229,9 +229,11 @@ void checkCorrectIPObtained()
 #ifdef ESPBOX2
   if (connectedIP != 1107405248) // which means 192.169.1.66 - for Kaon
   {
-    Serial.println("Wrong IP, ESP will reset");
-    Serial.println("!!!!!!!!!!!!!");
-    ESP.restart();
+	    Serial.println("ESPBOX1: Wrong IP, ESP will reset");
+	    Serial.println("!!!!!!!!!!!!!");
+	    Serial.print("ESPBOX1: connectedIP = ");
+	    Serial.println(connectedIP);
+	    ESP.restart();
   }
 #endif
 }

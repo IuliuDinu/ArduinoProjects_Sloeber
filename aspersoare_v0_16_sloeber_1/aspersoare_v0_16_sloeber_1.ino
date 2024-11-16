@@ -258,9 +258,9 @@ void printAnotherDailyProgramIsScheduled(WiFiClient client) // rejection reply i
 
 void connectInit() {
 
-	blinkAllLeds(4,10);
+	blinkAllLeds_debugMode(4,10);
 
-	blinkOneLed(REL_2, 1, 2);
+	blinkOneLed_debugMode(REL_2, 1, 2);
 
 	Serial.print(millis());
 	Serial.println(F(": connectInit."));
@@ -283,12 +283,12 @@ void connectInit() {
 
 	tConnect.yield(&connectCheck);            // This will pass control back to Scheduler and then continue with connection checking
 
-	blinkOneLed(REL_2, 1, 2);
+	blinkOneLed_debugMode(REL_2, 1, 2);
 
 }
 
 void connectCheck() {
-	blinkAllLeds(6,10);
+	blinkAllLeds_debugMode(6,10);
 
    Serial.print(millis());
    Serial.println(F(": connectCheck."));
@@ -299,34 +299,34 @@ void connectCheck() {
     Serial.print(F(": Connected to AP. Local ip: "));
     Serial.println(WiFi.localIP());
     Serial.println(F(": tConnect.disable() will NOT follow"));
-    blinkOneLed(REL_3, 5, 2);
+    blinkOneLed_debugMode(REL_3, 5, 2);
 
     if ((FALSE == wifiConnectionSucceeded) && (wifiDisconnectedCounter == 0)) // to run this sequence only once
     {
     	Serial.println("connectCheck(): performTimeClientSetup()");
-    	blinkOneLed(REL_2, 1, 2);
+    	blinkOneLed_debugMode(REL_2, 1, 2);
     	performTimeClientSetup();	// takes around 0.2s
-    	blinkOneLed(REL_2, 1, 2);
+    	blinkOneLed_debugMode(REL_2, 1, 2);
 
     	Serial.println("connectCheck(): updateWifiConnectionCounter()");
-    	blinkOneLed(REL_3, 1, 2);
+    	blinkOneLed_debugMode(REL_3, 1, 2);
     	updateWifiConnectionCounter();	// takes around 0.327s
-    	blinkOneLed(REL_3, 1, 2);
+    	blinkOneLed_debugMode(REL_3, 1, 2);
 
     	Serial.println("connectCheck(): serverBegin()");
-    	blinkOneLed(REL_2, 1, 2);
+    	blinkOneLed_debugMode(REL_2, 1, 2);
     	serverBegin();					// takes around 2ms
-    	blinkOneLed(REL_2, 1, 2);
+    	blinkOneLed_debugMode(REL_2, 1, 2);
 
     	Serial.println("connectCheck(): OTASetup()");
-    	blinkOneLed(REL_1, 1, 2);
+    	blinkOneLed_debugMode(REL_1, 1, 2);
     	OTASetup();						// takes around 4ms
-    	blinkOneLed(REL_1, 1, 2);
+    	blinkOneLed_debugMode(REL_1, 1, 2);
 
     	Serial.println("connectCheck(): checkCorrectIPObtained()");
-    	blinkOneLed(REL_1, 1, 2);
+    	blinkOneLed_debugMode(REL_1, 1, 2);
     	checkCorrectIPObtained();	// takes around 1ms
-    	blinkOneLed(REL_1, 1, 2);
+    	blinkOneLed_debugMode(REL_1, 1, 2);
 
     	wifiConnectionSucceeded = TRUE;
     }
@@ -354,7 +354,7 @@ void connectCheck() {
     if (tConnect.getRunCounter() % 10 == 0)
     {          // re-request connection every 10 seconds
 
-    	blinkOneLed(REL_3, 20, 2);
+    	blinkOneLed_debugMode(REL_3, 20, 2);
     	Serial.print(millis());
       Serial.println(F(": Re-requesting connection to AP..."));
 
@@ -385,14 +385,14 @@ void connectCheck() {
 
     }
   }
-  blinkAllLeds(6,10);
+  blinkAllLeds_debugMode(6,10);
 }
 
 void mainCallback() {
 
-	blinkOneLed(REL_1, 1, 1);
-	blinkOneLed(REL_2, 1, 1);
-	blinkOneLed(REL_3, 1, 1);
+	blinkOneLed_debugMode(REL_1, 1, 1);
+	blinkOneLed_debugMode(REL_2, 1, 1);
+	blinkOneLed_debugMode(REL_3, 1, 1);
   if (!WiFi.isConnected())
   {
     Serial.println("MAIN: WiFi is not connected");
@@ -3955,7 +3955,7 @@ void setup()
 
 
    delay(2000);
-   blinkAllLeds(2,10);
+   blinkAllLeds_debugMode(2,10);
 
    digitalWrite(REL_1, LOW);
    digitalWrite(REL_2, LOW);
@@ -4048,7 +4048,7 @@ void setup()
   loadTimersDataFromEEPROM();
 
 //  timestampForNextNTPSync = millis();
-  blinkAllLeds(3,10);
+  blinkAllLeds_debugMode(3,10);
 
   tConnect.setInterval(1000);
   tMain.enable();
