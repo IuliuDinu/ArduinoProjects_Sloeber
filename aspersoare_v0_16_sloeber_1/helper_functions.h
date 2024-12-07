@@ -24,3 +24,4 @@ void resetAllLoads();
 void serverBegin();
 void OTASetup();
 void checkCorrectIPObtained();
+void testConvertSunsetValueToTime(uint8_t inputSunsetVal, uint8_t *outHour, uint8_t *outMin);

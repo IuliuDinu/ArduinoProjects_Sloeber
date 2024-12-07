@@ -237,3 +237,12 @@ void checkCorrectIPObtained()
   }
 #endif
 }
+
+void testConvertSunsetValueToTime(uint8_t inputSunsetVal, uint8_t *outHour, uint8_t *outMin)
+{
+	uint8_t hourSunset, minSunset;
+	hourSunset = (inputSunsetVal&0b11100000)>>5;
+	minSunset = inputSunsetVal&0b00011111;
+	*outHour = hourSunset+16; 	//started from 16:00 because it's the smallest sunset hour
+	*outMin = minSunset*2; 		//times 2 because we can store only up to 32 values for minutes, so we have an error of +/- 2min;
+}
