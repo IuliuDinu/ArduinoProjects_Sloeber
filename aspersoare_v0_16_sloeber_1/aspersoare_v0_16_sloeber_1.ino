@@ -21,6 +21,7 @@
 #include "specific_typedefs.h"
 #include "NTP_functions.h"
 #include "time_client_functions.h"
+#include "E2P_daylight_defs.h"
 
 
 //#define ONE_DAY_IN_MILISECONDS  86400000
@@ -2083,10 +2084,12 @@ void mainCallback() {
         if (request.indexOf("ProgVersion") != -1)
         {
         	client.println("*********************");
-        	client.println("Versiune: aspersoare_v0_15_sloeber_1");
-        	client.println("Last flash: 17-Feb-2024");
-        	client.println("Repo: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: a67e3d2");
+        	client.println("Versiune: aspersoare_v0_16_sloeber_1");
+        	client.println("Last flash: 07-Dec-2024");
+        	client.println("Repo: ArduinoProjects_Sloeber");
+        	client.println("Folder: aspersoare_v0_16_sloeber_1");
+        	client.println("Branch: aspersoare_v0_16_sloeber_for_ASP_module_split");
+        	client.println("Commit ID: 04a248f");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -3896,6 +3899,20 @@ void mainCallback() {
 			client.println(gs_clockdate_test.d);
 			client.print("WeekDay: ");
 			client.println(gs_clockdate_test.wd);
+		}
+#endif
+
+#ifdef TESTE
+        if (request == "chkval")
+		{
+        	uint8_t printhour=0, printmin=0;
+        	testConvertSunsetValueToTime(SUNSET_JUL_15, &printhour, &printmin);
+        	client.println("Sunset time for July 15: ");
+        	client.print("Sunset hour: ");
+			client.println(printhour);
+			client.print("Sunset min: ");
+			client.println(printmin);
+			client.println("");
 		}
 #endif
 
