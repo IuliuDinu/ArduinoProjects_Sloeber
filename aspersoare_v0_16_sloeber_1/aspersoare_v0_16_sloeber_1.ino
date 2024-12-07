@@ -22,6 +22,7 @@
 #include "NTP_functions.h"
 #include "time_client_functions.h"
 #include "E2P_daylight_defs.h"
+#include "Daylight_functions.h"
 
 
 //#define ONE_DAY_IN_MILISECONDS  86400000
@@ -157,7 +158,8 @@ unsigned long instantProgramStartTime = 0; // refers to instant timer activation
 unsigned long timestampForNextNTPSync = 0;
 unsigned char cnt = 0;
 unsigned long timestampForNextLoadSwitch = 0;
-
+unsigned long todayTimeForLampStart = 0;
+uint8_t sunsetTimeValues[12][31] = {0};
 
 bool gb_timeIsSynced = 0;
 bool gb_timeHasToBeSynced = 1;
@@ -175,6 +177,8 @@ clock_and_date_type gs_last_successful_menu_run = {0};
 #ifdef TESTE
 clock_and_date_type gs_clockdate_test = {0};
 #endif
+
+
 
 
 void updateLocalTime()
@@ -2089,7 +2093,7 @@ void mainCallback() {
         	client.println("Repo: ArduinoProjects_Sloeber");
         	client.println("Folder: aspersoare_v0_16_sloeber_1");
         	client.println("Branch: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: 04a248f");
+        	client.println("Commit ID: 742ec59");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -3912,7 +3916,10 @@ void mainCallback() {
 			client.println(printhour);
 			client.print("Sunset min: ");
 			client.println(printmin);
+			client.print("Sunset array[7][15]: ");
+			client.println(sunsetTimeValues[7][15]);
 			client.println("");
+
 		}
 #endif
 
@@ -4085,6 +4092,8 @@ void setup()
 
   tConnect.setInterval(1000);
   tMain.enable();
+
+  Init_sunsetTimeValues(sunsetTimeValues);
 
 } //end of setup()
 
