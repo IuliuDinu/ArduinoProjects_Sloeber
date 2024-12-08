@@ -98,36 +98,36 @@
 #define SUNSET_MAR_31			117 // hour shifted +1
 
 /* APRIL 2024 */
-#define SUNSET_APRIL_01			117
-#define SUNSET_APRIL_02			118
-#define SUNSET_APRIL_03			118
-#define SUNSET_APRIL_04			119
-#define SUNSET_APRIL_05			120
-#define SUNSET_APRIL_06			120
-#define SUNSET_APRIL_07			121
-#define SUNSET_APRIL_08			121
-#define SUNSET_APRIL_09			122
-#define SUNSET_APRIL_10			123
-#define SUNSET_APRIL_11			123
-#define SUNSET_APRIL_12			124
-#define SUNSET_APRIL_13			125
-#define SUNSET_APRIL_14			125
-#define SUNSET_APRIL_15			128
-#define SUNSET_APRIL_16			128
-#define SUNSET_APRIL_17			129
-#define SUNSET_APRIL_18			130
-#define SUNSET_APRIL_19			130
-#define SUNSET_APRIL_20			131
-#define SUNSET_APRIL_21			131
-#define SUNSET_APRIL_22			132
-#define SUNSET_APRIL_23			133
-#define SUNSET_APRIL_24			133
-#define SUNSET_APRIL_25			134
-#define SUNSET_APRIL_26			135
-#define SUNSET_APRIL_27			135
-#define SUNSET_APRIL_28			136
-#define SUNSET_APRIL_29			136
-#define SUNSET_APRIL_30			137
+#define SUNSET_APR_01			117
+#define SUNSET_APR_02			118
+#define SUNSET_APR_03			118
+#define SUNSET_APR_04			119
+#define SUNSET_APR_05			120
+#define SUNSET_APR_06			120
+#define SUNSET_APR_07			121
+#define SUNSET_APR_08			121
+#define SUNSET_APR_09			122
+#define SUNSET_APR_10			123
+#define SUNSET_APR_11			123
+#define SUNSET_APR_12			124
+#define SUNSET_APR_13			125
+#define SUNSET_APR_14			125
+#define SUNSET_APR_15			128
+#define SUNSET_APR_16			128
+#define SUNSET_APR_17			129
+#define SUNSET_APR_18			130
+#define SUNSET_APR_19			130
+#define SUNSET_APR_20			131
+#define SUNSET_APR_21			131
+#define SUNSET_APR_22			132
+#define SUNSET_APR_23			133
+#define SUNSET_APR_24			133
+#define SUNSET_APR_25			134
+#define SUNSET_APR_26			135
+#define SUNSET_APR_27			135
+#define SUNSET_APR_28			136
+#define SUNSET_APR_29			136
+#define SUNSET_APR_30			137
 
 /* MAY 2024 */
 #define SUNSET_MAY_01			138
