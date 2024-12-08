@@ -174,6 +174,8 @@ zoneSettings gs_zone1 = {0}, gs_zone2 = {0}, gs_zone3 = {0};
 
 clock_type gs_localClock = {0};
 clock_and_date_type gs_last_successful_menu_run = {0};
+clock_and_date_type gs_current_time_and_date = {0};
+unsigned int prevMonth=0, prevDay=0;
 #ifdef TESTE
 clock_and_date_type gs_clockdate_test = {0};
 #endif
@@ -206,7 +208,12 @@ void updateLocalTimersInMainLoop()
 			  Serial.print("Local time (s): ");
 			  Serial.println(localTime);
 			  timestampForNextNTPSync = millis();
-			  /*If date > 3*/
+			  getDateFromNTPToStruct(gs_current_time_and_date);
+			  if ((gs_current_time_and_date.mo != prevMonth)||(gs_current_time_and_date.d != prevDay))
+			  {
+				  // to write here the scenario for refreshing the sunset time in the global variable, only when the date has changed, not every 15 mins;
+			  }
+			  Refresh_sunsetTime(&todayTimeForLampStart);
 		  }
 		  else
 		  {
@@ -2089,11 +2096,11 @@ void mainCallback() {
         {
         	client.println("*********************");
         	client.println("Versiune: aspersoare_v0_16_sloeber_1");
-        	client.println("Last flash: 07-Dec-2024");
+        	client.println("Last flash: 08-Dec-2024");
         	client.println("Repo: ArduinoProjects_Sloeber");
         	client.println("Folder: aspersoare_v0_16_sloeber_1");
         	client.println("Branch: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: 5fb0828");
+        	client.println("Commit ID: f8325b8");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -3927,6 +3934,12 @@ void mainCallback() {
 					client.println(sunsetTimeValues[i][j]);
 				}
 		}
+
+        if (request == "chkvalstart")
+		{
+        	client.print("Today time (sec) for lamp start: ");
+        	client.println(todayTimeForLampStart);
+		}
 #endif
 
         if (request == "clearRstAndWifiCounters")
@@ -4096,10 +4109,12 @@ void setup()
 //  timestampForNextNTPSync = millis();
   blinkAllLeds_debugMode(3,10);
 
+  Init_sunsetTimeValues(sunsetTimeValues);
+
   tConnect.setInterval(1000);
   tMain.enable();
 
-  Init_sunsetTimeValues(sunsetTimeValues);
+
 
 } //end of setup()
 
