@@ -1,4 +1,5 @@
 #include "time_client_functions.h"
+#include "NTP_functions.h"
 
 void performTimeClientSetup()
 {
@@ -20,6 +21,9 @@ void performTimeClientSetup()
     {
       Serial.println("performTimeClientSetup: timeClientUpdateSuccess");
       formattedStartupTime = timeClient.getFormattedTime(); // this retrieves the last updated values from the object timeClient;
+      getDateFromNTPToStruct(gs_current_time_and_date);
+      prevMonth = gs_current_time_and_date.mo;
+      prevDay = gs_current_time_and_date.d;
       Serial.print("Formatted START-UP Time: ");
       Serial.println(formattedStartupTime);
     }

@@ -388,3 +388,14 @@ void Init_sunsetTimeValues(uint8_t values[12][31])
 	values[11][29] = SUNSET_DEC_30;
 	values[11][30] = SUNSET_DEC_31;
 }
+
+void Refresh_sunsetTime(unsigned long *sunsetTime)
+{
+	uint8_t hourSunset, minSunset;
+	unsigned int currentMonth, currentDay;
+	currentMonth = gs_current_time_and_date.mo;
+	currentDay = gs_current_time_and_date.d;
+	testConvertSunsetValueToTime(sunsetTimeValues[currentMonth-1][currentDay-1], &hourSunset, &minSunset);
+	*sunsetTime = (hourSunset*3600) + (minSunset*60);
+
+}
