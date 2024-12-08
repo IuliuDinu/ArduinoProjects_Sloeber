@@ -2093,7 +2093,7 @@ void mainCallback() {
         	client.println("Repo: ArduinoProjects_Sloeber");
         	client.println("Folder: aspersoare_v0_16_sloeber_1");
         	client.println("Branch: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: 742ec59");
+        	client.println("Commit ID: 5fb0828");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -3916,10 +3916,16 @@ void mainCallback() {
 			client.println(printhour);
 			client.print("Sunset min: ");
 			client.println(printmin);
-			client.print("Sunset array[7][15]: ");
-			client.println(sunsetTimeValues[7][15]);
-			client.println("");
-
+			for (int i=0; i<12; i++)
+				for (int j=0; j<31; j++)
+				{
+					client.print("sunset[");
+					client.print(i+1);
+					client.print("][");
+					client.print(j+1);
+					client.print("]= ");
+					client.println(sunsetTimeValues[i][j]);
+				}
 		}
 #endif
 
