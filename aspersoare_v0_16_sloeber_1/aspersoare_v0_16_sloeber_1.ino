@@ -195,16 +195,16 @@ void updateLocalTime()
   syncTime = gul_max24hMillis/1000;
 }
 
-
+uint8_t happened = 0;
 void updateLocalTimersInMainLoop()
 {
 	  currentMillis = millis();
 
 	  // Updating localtime every 15 minutes
 	  if ((currentMillis - timestampForNextNTPSync) > TIME_INTERVAL_TO_RECHECK_NTP)
-	  {
+	  {	happened++;
 		  if (syncWithNTP())
-		  {
+		  {happened++;
 			  Serial.print("Local time (s): ");
 			  Serial.println(localTime);
 			  timestampForNextNTPSync = millis();
@@ -2100,7 +2100,7 @@ void mainCallback() {
         	client.println("Repo: ArduinoProjects_Sloeber");
         	client.println("Folder: aspersoare_v0_16_sloeber_1");
         	client.println("Branch: aspersoare_v0_16_sloeber_for_ASP_module_split");
-        	client.println("Commit ID: f8325b8");
+        	client.println("Commit ID: 79c48a0");
 #ifdef ESPBOX1
         	client.println("Cutie relee ESPBOX1 - CURTE SPATE");
         	client.println("Comenzi disponibile:");
@@ -3935,6 +3935,16 @@ void mainCallback() {
 				}
 		}
 
+        if (request == "chkval2")
+		{
+        	client.print("prevMonth var: ");
+        	client.println(prevMonth);
+        	client.print("prevDay var: ");
+        	client.println(prevDay);
+        	client.print("happened= ");
+        	client.println(happened);
+		}
+
         if (request == "chkvalstart")
 		{
         	client.print("Today time (sec) for lamp start: ");
@@ -3997,6 +4007,7 @@ void setup()
 	//eepromInitParticularByte(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED);
    wifiDisconnectedLoopCounter = 0;
    wifiDisconnectedCounter = 0;
+   Init_sunsetTimeValues(sunsetTimeValues); // should be here, before any delays; otherwise, it happens after the performTimeClientSetup() runs
 
    // TEMPORAR
 #ifdef ESPBOX1
@@ -4108,8 +4119,6 @@ void setup()
 
 //  timestampForNextNTPSync = millis();
   blinkAllLeds_debugMode(3,10);
-
-  Init_sunsetTimeValues(sunsetTimeValues);
 
   tConnect.setInterval(1000);
   tMain.enable();
