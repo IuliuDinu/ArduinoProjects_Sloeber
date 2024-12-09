@@ -388,6 +388,18 @@ byte setEeprom_lastMenuSuccessfullyEnded_Sec(byte val) // save info in EEPROM: t
     return status;
 }
 
+byte setEeprom_DaylightSavingStatus(byte val) // save info in EEPROM: the status of the Daylight Saving status
+{
+    byte status = 0;
+    EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+    delay(100);
+    EEPROM.write(EEPROM_ADDR_DAYLIGHT_SAVING_STATUS, byte(val));
+    delay(100);
+    status = EEPROM.commit();
+    delay(100);
+    return status;
+}
+
 void setEeprom_allParametersForScheduledOneTime()
 {
 	setEeprom_timerScheduledOneTime(timerScheduledOneTime);
@@ -648,6 +660,17 @@ byte getEeprom_lastMenuSuccessfullyEnded_Sec()
   val = EEPROM.read(EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC);
   delay(100);
   Serial.print("EEPROM_ADDR_LAST_MENU_SUCCESSFULLY_ENDED_SEC: ");
+  Serial.println(val);
+  return val;
+}
+
+byte getEeprom_DaylightSavingStatus()
+{
+  byte val = 0;
+  EEPROM.begin(EEPROM_TOTAL_NB_OF_DEFINED_BYTES); //1 byte used now
+  val = EEPROM.read(EEPROM_ADDR_DAYLIGHT_SAVING_STATUS);
+  delay(100);
+  Serial.print("EEPROM_ADDR_DAYLIGHT_SAVING_STATUS: ");
   Serial.println(val);
   return val;
 }

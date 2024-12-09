@@ -394,8 +394,8 @@ void Refresh_sunsetTime(unsigned long *sunsetTime)
 	uint8_t hourSunset, minSunset;
 	unsigned int currentMonth, currentDay;
 	currentMonth = gs_current_time_and_date.mo;
-	currentDay = gs_current_time_and_date.d;
-	testConvertSunsetValueToTime(sunsetTimeValues[currentMonth-1][currentDay-1], &hourSunset, &minSunset);
+	currentDay = gs_current_time_and_date.d;	// dependent on global var!
+	testConvertSunsetValueToTime(sunsetTimeValues[currentMonth-1][currentDay-1], &hourSunset, &minSunset);	// dependent on global var!
 	*sunsetTime = (hourSunset*3600) + (minSunset*60);
 
 }

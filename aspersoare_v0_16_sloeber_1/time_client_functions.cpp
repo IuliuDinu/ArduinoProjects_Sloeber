@@ -24,6 +24,7 @@ void performTimeClientSetup()
       getDateFromNTPToStruct(gs_current_time_and_date);
       prevMonth = gs_current_time_and_date.mo;
       prevDay = gs_current_time_and_date.d;
+      Refresh_sunsetTime(&todayTimeForLampStart);
       Serial.print("Formatted START-UP Time: ");
       Serial.println(formattedStartupTime);
     }
