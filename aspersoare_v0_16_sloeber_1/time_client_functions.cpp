@@ -4,15 +4,26 @@
 void performTimeClientSetup()
 {
     // Initialize a NTPClient to get time
+	int timeOffset = 0;
     timeClient.begin();
     delay(100);
+    currentDaylightSavingStatus = getEeprom_DaylightSavingStatus();
     // Set offset time in seconds to adjust for your timezone, for example:
     // GMT +1 = 3600
     // GMT +8 = 28800
     // GMT -1 = -3600
     // GMT 0 = 0
     //timeClient.setTimeOffset(10800); // SUMMER TIME
-    timeClient.setTimeOffset(7200); // WINTER TIME
+    //timeClient.setTimeOffset(7200); // WINTER TIME
+    if (currentDaylightSavingStatus == TRUE)
+    {
+    	timeOffset = 7200;	// winter time
+    }
+    else
+    {
+    	timeOffset = 10800;	// summer time
+    }
+    timeClient.setTimeOffset(timeOffset);
 
     bool syncSuccess = 0;
     syncSuccess = syncWithNTP();
