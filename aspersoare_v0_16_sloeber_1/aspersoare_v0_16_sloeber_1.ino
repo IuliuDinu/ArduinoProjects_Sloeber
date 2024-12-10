@@ -1525,7 +1525,7 @@ void mainCallback() {
 	{	//Serial.println("menuNumberScheduledDailyOneLoadOnly == 50");
 		if (timerScheduledDailyOneLoadOnlyStarted == FALSE)	// scheduled timer not yet started
 		{
-			if ((localTime >= MENIU_50_LOCALTIME_START) && (localTime < MENIU_50_LOCALTIME_START + MENIU_50_DURATION - 30))
+			if ((localTime >= todayTimeForLampStart) && (localTime < IN_SECONDS_24H_MINUS_1MIN))
 			{	//Serial.println("!!!!! localTime >= MENIU_40_LOCALTIME_START !!!!!!!!");
 				timerScheduledDailyOneLoadOnlyStarted = TRUE;
 				//timestampForNextLoadSwitch = localTime + 300; // TO DO: to handle with millis to avoid problem around 12 AM
@@ -1563,7 +1563,7 @@ void mainCallback() {
 				saveLastMenuSuccessfullyEnded_Parameters();
 			}
 
-			if (localTime >= MENIU_50_LOCALTIME_START + MENIU_50_DURATION - 15)
+			if (localTime >= IN_SECONDS_24H_MINUS_1MIN + 45) //23:59:45
 			{
 				timerScheduledDailyOneLoadOnlyStarted = FALSE;
 				//rel1_status = LOW;
@@ -2118,6 +2118,11 @@ void mainCallback() {
         	client.println("m50_stop - ANULARE PROGRAM: Lampa spate pornita zilnic de la 17:45 la 23:59");
         	client.println("boardTime - [sec] timp dupa reset");
         	client.println("localtime - experimental");
+        	client.println("chkval - (experimental) afiseaza valorile...");
+        	client.println("chkval2 - (experimental) afiseaza valorile...");
+        	client.println("chkvalstart - afiseaza ora de start a lampii (in secunde)");
+        	client.println("check_daylight - afiseaza 1 daca este ora de iarna, 0 daca este ora de vara");
+        	client.println("toggle_daylight - treci de la ora de vara la ora de iarna sau viceversa");
         	client.println("SystemRestart (buton RESET) - Reset sistem");
 
 #endif

@@ -74,3 +74,5 @@
 //#define MENIU_50_DURATION				27000
 #define MENIU_50_LOCALTIME_START		63900	//lampa spate - februarie - 30 martie - 17:15-00:00
 #define MENIU_50_DURATION				22500
+
+#define IN_SECONDS_24H_MINUS_1MIN		86340
