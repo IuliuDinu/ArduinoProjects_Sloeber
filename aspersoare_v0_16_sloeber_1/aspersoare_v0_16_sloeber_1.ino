@@ -134,6 +134,7 @@ byte lastMenuSuccessfullyEnded = 0; // gets the value of the last menu
 
 bool timeClientSetupWasPerformed = 0;
 bool wifiConnectionSucceeded = 0;
+bool currentDaylightSavingStatus = 0;
 
 
 // Will keep board startup time
@@ -317,7 +318,7 @@ void connectCheck() {
     {
     	Serial.println("connectCheck(): performTimeClientSetup()");
     	blinkOneLed_debugMode(REL_2, 1, 2);
-    	performTimeClientSetup();	// takes around 0.2s
+    	performTimeClientSetup();	// takes around 0.2s // TODO: to be re-measured!
     	blinkOneLed_debugMode(REL_2, 1, 2);
 
     	Serial.println("connectCheck(): updateWifiConnectionCounter()");
@@ -3957,6 +3958,31 @@ void mainCallback() {
 			client.println("Clearing Reset counter and WiFi Disconnection counters...");
 			eepromEraseResetAndWifiDiscCounters();
 			client.println("Counters have been reset.");
+		}
+
+        if (request == "toggle_daylight")
+		{
+        	client.println("Toggling Daylight Saving status...");
+        	if (currentDaylightSavingStatus == TRUE)
+        	{
+        		setEeprom_DaylightSavingStatus(FALSE);
+        		currentDaylightSavingStatus = FALSE;
+        		timeClient.setTimeOffset(10800);
+        		client.print("Daylight Saving status is now OFF - SUMMER TIME.");
+        	}
+        	else
+        	{
+        		setEeprom_DaylightSavingStatus(TRUE);
+        		currentDaylightSavingStatus = TRUE;
+        		timeClient.setTimeOffset(7200);
+        		client.print("Daylight Saving status is now ON - WINTER TIME.");
+        	}
+		}
+
+        if (request == "check_daylight")
+		{
+        	client.print("Current Daylight Saving status is: ");
+        	client.println(currentDaylightSavingStatus);
 		}
 
 
